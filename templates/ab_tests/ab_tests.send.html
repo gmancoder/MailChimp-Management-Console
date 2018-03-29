@@ -1,0 +1,22 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<form name="send_form" id="send_form" class="form form-horizontal" action="" method="POST">
+			<input type="hidden" name="referrer" id="referrer" value="{{referrer}}" />
+			<div class="form-group">
+				<label for="variate_name" class="control-label col-lg-2">A/B Test: </label>
+				<div class="col-lg-10">
+					{{name}}
+				</div>
+			</div>
+			<p>Confirm Starting this A/B Test immediately?</p>
+			<div class="form-group">
+				<input type="submit" class="btn btn-primary" value="Begin A/B Test" />
+				<a href="javascript:history.go(-1);" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

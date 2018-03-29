@@ -1,0 +1,77 @@
+{% extends "layouts/layout.folders_lists.html" %}
+{% block tool_buttons %}{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<table cellspacing="0" cellpadding="5" id="campaign_tracking_table" class="tool_list_table">
+			<thead>
+				<tr>
+					<th align="center" style="width:25px;"><input type="checkbox" id="campaign_tracking_check_all" name="campaign_tracking_check_all" onClick="ToggleAll('campaign_tracking_check');" /></th>
+					<th style="width:200px;">Campaign</th>
+					<th style="width:200px;">Email</th>
+					<th style="width:200px;">Subject</th>
+					<th style="width:200px;">Date Sent</th>
+					<th style="width:50px;">Sent</th>
+					<th style="width:50px;">Delivered</th>
+					<th style="width:50px;">Delivery Rate</th>
+					<th style="width:50px;">Opens</th>
+					<th style="width:50px;">Clicks</th>
+					<th style="width:200px;">Created</th>
+					<th style="width:200px;">Last Updated</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for tracked in campaign_tracking %}
+				<tr>
+					<td align="center" style="width:25px;"><input type="checkbox" class="campaign_tracking_check" name="check_{{tracked.id}}" id="check_{{tracked.id}}" value="{{tracked.id}}" /></td>
+					<td style="width:200px;"><a href="/tracking/campaigns/{{tracked.id}}/detail">{{tracked.campaign_name}}</a></td>
+					<td style="width:200px;">{{tracked.email_name}}</td>
+					<td style="width:200px;">{{tracked.subject_line}}</td>
+					<td style="width:200px;">{{tracked.send_time}}</td>
+					<td style="width:50px;">{{tracked.number_sent}}</td>
+					<td style="width:50px;">{{tracked.number_delivered}}</td>
+					<td style="width:50px;">{{(tracked.delivery_rate * 100)|round(3)}}%</td>
+					<td style="width:50px;">{{tracked.number_opens}}</td>
+					<td style="width:50px;">{{tracked.number_clicks}}</td>
+					<td style="width:200px;">{{tracked.created}}</td>
+					<td style="width:200px;">{{tracked.updated}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" id="table_foot_row">
+	<div class="col-md-6 table_foot">
+		Show&nbsp;
+		<select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('campaign_tracking');">
+			<option value="10" {{"selected" if session['r'] == 10}}>10</option>
+			<option value="25" {{"selected" if session['r'] == 25}}>25</option>
+			<option value="50" {{"selected" if session['r'] == 50}}>50</option>
+			<option value="100" {{"selected" if session['r'] == 100}}>100</option>
+			<option value="0" {{"selected" if session['r'] == 0}}>All</option>
+		</select>
+		&nbsp;Rows
+	</div>
+	<div class="col-md-6 pull-right table_foot" style="text-align:right;">
+		{% if pages > 1 %}
+			{% if current_page > 1 %}
+			<a href="/tracking/campaigns/{{current_page - 1}}" class="page_link">< Prev</a>&nbsp;
+			{% endif %}
+			{% for idx in range(1, (pages + 1)) %}
+				{% if idx == current_page %}
+				<strong>{{idx}}</strong>&nbsp;
+				{% else %}
+				<a href="/tracking/campaigns/{{idx}}">{{idx}}</a>&nbsp;
+				{% endif %}
+			{% endfor %}
+			{% if current_page < pages %}
+			<a href="/tracking/campaigns/{{current_page + 1}}" class="page_link">Next ></a>&nbsp;
+			{% endif %}
+		{% else %}
+			<strong>1</strong>
+		{% endif %}
+	</div>
+</div>
+</div>
+{% endblock %}

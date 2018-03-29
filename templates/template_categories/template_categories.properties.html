@@ -1,0 +1,13 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('template_categories');" class="btn btn-xs btn-primary">Save</a>
+<a href="/template_categories" class="btn btn-xs btn-default">Cancel</a>
+{% endblock %}
+{% block content %}
+<form name="template_categories_form" id="template_categories_form" class="form form-horizontal" action="" method="POST">
+	{{form}}
+</form>
+<script type="text/javascript">
+	var required_fields = [{{required}}]
+</script>
+{% endblock %}

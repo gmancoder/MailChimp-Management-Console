@@ -1,0 +1,254 @@
+{% extends "layouts/layout.html" %}
+{% block head %}
+<script src="/static/js/tools.{{g.current_tool.alias}}.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/tools.{{g.current_tool.alias}}.css" type="text/css" />
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5bfV9Q_WqYnsRiRReXAXdUhmrpi6qaEY&amp;callback=initMap"></script>
+<script type="text/javascript">
+	var current_list = {{current_list.id}}
+	$(document).ready(function() {
+		$('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
+	        $.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
+	    } );
+		$('.mdy').datepicker({
+			format:'mm/dd/yyyy'
+		});
+		$('.dmy').datepicker({
+			format:'dd/mm/yyyy'
+		});
+		$('.md').datepicker({
+			format:'mm/dd'
+		});
+		$('.dm').datepicker({
+			format:'dd/mm'
+		});
+		$('#subscriber_activity_table').DataTable({
+	    	"scrollX": true,
+			"scrollY": '50vh',
+			"scrollCollapse": true,
+			"searching": false,
+			"paging": false,
+			"ordering": false,
+			"lengthChange": false,
+			"info": false,    
+		});
+	});
+	function initMap() {
+		{% if not new %}
+        var myLoc = {lat: {{subscriber_location.latitude}}, lng: {{subscriber_location.longitude}}};
+        {% else %}
+        var myLoc = {lat: 43.0492658, lng:-73.84354}
+        {% endif %}
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 8,
+          center: myLoc
+        });
+        var marker = new google.maps.Marker({
+          position: myLoc,
+          map: map
+        });
+
+         map.addListener('click', function(evt) {
+          // 3 seconds after the center of the map has changed, pan back to the
+          // marker.
+          marker.setPosition(evt.latLng);
+          $('#latitude').val(evt.latLng.lat());
+          $('#longitude').val(evt.latLng.lng());
+        });
+      }
+</script>
+{% endblock %}
+{% block body %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row" id="breadcrumb_row">
+			<div class="col-md-12">
+				<!-- Breadcrumbs -->
+				<ol class="breadcrumb">
+					{% if current_folder != None %}
+					{{ current_folder.drawBreadCrumb("", -1) }}
+					{% endif %}
+					<li><a href="/lists/{{current_list.id}}/detail">{{current_list.name}}</a></li>
+					{% if not new %}
+					<li><strong>{{subscriber['EmailAddress']}}</strong></li>
+					{% else %}
+					<li><strong>New Subscriber</strong></li>
+					{% endif %}
+				</ol>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<ul class="nav nav-tabs" role="tablist">
+				    <li role="presentation" class="active"><a href="#subscriber" aria-controls="subscriber" role="tab" data-toggle="tab">Subscriber Details</a></li>
+				    <li role="presentation"><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Activity</a></li>
+				</ul>
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="subscriber">
+						<form name="subscriber_form" class="form form-horizontal" action="" method="POST" id="subscriber_form">
+							<input type="hidden" name="refer" id="refer" value="{{refer}}" />
+							<div class="row">
+								<div class="col-md-7">
+									<div class="row">
+										<div class="col-md-12">
+											<div class="media">
+											  <div class="media-left">
+											    <a href="#">
+											      <img class="media-object" src="/static/img/{{subscriber['Status']}}.png" alt="{{subscriber['Status']}}" title="{{subscriber['Status']}}" />
+											    </a>
+											  </div>
+											  <div class="media-body">
+											    <h4 class="media-heading">{{subscriber['EmailAddress']}}</h4>
+											    <strong>List: </strong>{{current_list.name}}
+											  </div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											{% if new %}
+											<div class="form-group">
+												<label for="email_address" class="control-label col-lg-2">Email Address</label>
+												<div class="col-lg-10">
+													<input type="email" class="form-control" name="email_address" id="email_address" required />
+												</div>
+											</div>
+											{% endif %}
+											{% if current_list.email_type_option %}
+											<div class="form-group">
+												<label for="email_type" class="control-label col-lg-2">Email Type</label>
+												<div class="col-lg-10">
+													<select name="email_type" id="email_type" required class="form-control">
+														<option value="html" {{"selected" if subscriber["EmailTypePreference"] == "html"}}>HTML</option>
+														<option value="text" {{"selected" if subscriber["EmailTypePreference"] == "text"}}>Text</option>
+													</select>
+												</div>
+											</div>
+											{% else %}
+											<input type="hidden" name="email_type" id="email_type" value="html" />
+											{% endif %}
+											<div class="form-group">
+												<label for="status" class="control-label col-lg-2">Status</label>
+												<div class="col-lg-10">
+													<select name="status" id="status" required class="form-control">
+														<option value="subscribed" {{"selected" if subscriber['Status'] == "subscribed"}}>Subscribed</option>
+														<option value="unsubscribed" {{"selected" if subscriber['Status'] == "unsubscribed"}}>Unsubscribed</option>
+														<option value="cleaned" {{"selected" if subscriber['Status'] == "cleaned"}}>Cleaned</option>
+														<option value="pending" {{"selected" if subscriber['Status'] == "pending"}}>Pending</option>
+													</select>
+												</div>
+											</div>
+											{% for merge_field in merge_fields %}
+												<div class="form-group">
+													<label for="{{merge_field.tag}}" class="control-label col-lg-2">
+														{{merge_field.name}}
+														{% if merge_field.required %}
+														<span class="required">*</span>
+														{% endif %}
+													</label>
+													<div class="col-lg-10">
+														{% if merge_field.type == "text" %}
+														<input type="text" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" maxlength="{{merge_field.size if merge_field.size > 0 else 50}}" {{"required" if merge_field.required}}/>
+														{% elif merge_field.type == "dropdown" %}
+														<select name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" {{"required" if merge_field.required}}>
+															{% for choice in merge_field.choices.all() %}
+															<option value="{{choice.choice}}" {{"selected" if subscriber[merge_field.tag] == choice.choice}}>{{choice.choice}}</option>
+															{% endfor %}
+														</select>
+														{% elif merge_field.type == "number" %}
+														<input type="number" step="any" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" {{"required" if merge_field.required}}/>
+														{% elif merge_field.type == "radio" %}
+															{% set idx = 0 %}
+															{% for choice in merge_field.choices.all() %}
+															<input type="radio" name="{{merge_field.tag}}" id="{{merge_field.tag}}_{{idx}}" class="required-{{merge_field.required}}" value="{{choice.choice}}" {{"checked='checked'" if subscriber[merge_field.tag] == choice.choice}} >&nbsp;{{choice.choice}}<br />
+															{% set idx = idx + 1 %}
+															{% endfor %}
+														{% elif merge_field.type == "date" %}
+														<input type="text" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}} {{'mdy' if merge_field.date_format == 'MM/DD/YYYY' else 'dmy'}}" value="{{subscriber[merge_field.tag]}}" {{"required" if merge_field.required}}/>
+														{% elif merge_field.type == "birthday" %}
+														<input type="text" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}} {{'md' if merge_field.date_format == 'MM/DD' else 'dm'}}" value="{{subscriber[merge_field.tag]}}" {{"required" if merge_field.required}}/>
+														{% elif merge_field.type == "phone" %}
+														<input type="phone" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" />
+														{% elif merge_field.type == "url"  %}
+														<input type="url" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" />
+														{% elif merge_field.type == "email" %}
+														<input type="email" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" />
+														{% else %}
+														<input type="text" name="{{merge_field.tag}}" id="{{merge_field.tag}}" class="form-control required-{{merge_field.required}}" value="{{subscriber[merge_field.tag]}}" />
+														{% endif %}
+													</div>
+												</div>
+											{% endfor %}
+											<div class="form-group">
+												<input type="submit" name="submit" id="submit" value="Submit" class="btn btn-primary" />
+												<a href="javascript:history.go(-1);" class="btn btn-default">Cancel</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-5">
+									<div class="row">
+										<div class="col-md-12">
+											<div id="map" style="width:100%;height:400px;"></div>
+											<br />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<div class="form-group">
+												<label for="latitude" class="control-label col-lg-2">Latitude:</label>
+												<div class="col-lg-10">
+													<input type="text" class="form-control" name="latitude" id="latitude" value="{{subscriber_location.latitude if not new else '43.0492658'}}" />
+												</div>
+											</div>
+											<div class="form-group">
+												<label for="longitude" class="control-label col-lg-2">Longitude:</label>
+												<div class="col-lg-10">
+													<input type="text" class="form-control" name="longitude" id="longitude" value="{{subscriber_location.longitude if not new else '-73.84354'}}" />
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<h4>Segments Contained Within:</h4>
+											<ul>
+												{% for segment in segments %}
+													<li><a href="/segments/{{segment['id']}}/detail">{{segment['name']}}</a></li>
+												{% endfor %}
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="activity">
+						<table width="100%" id="subscriber_activity_table" class="tool_list_table">
+							<thead>
+								<tr>
+									<th>Campaign Title</th>
+									<th>Action</th>
+									<th>Type</th>
+									<th>Clicked URL</th>
+									<th>Time</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for act in activity %}
+								<tr>
+									<td>{{act.title}}</td>
+									<td>{{act.action}}</td>
+									<td>{{act.type}}</td>
+									<td>{{act.url}}</td>
+									<td>{{act.timestamp}}</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

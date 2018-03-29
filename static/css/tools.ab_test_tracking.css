@@ -1,0 +1,18 @@
+#tracking_detail {
+    background-color:#eeeeee;
+}
+.tracking_table {
+    background-color:white;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    margin:5px 0px;
+}
+.tracking_table tr {
+    height:30px;
+}
+.tracking_table tr th.left-heading {
+    padding-left:17px;
+}
+.col-md-8#details_table_split {
+    padding-right:7px;
+}

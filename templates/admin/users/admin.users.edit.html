@@ -1,0 +1,80 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('users');" class="btn btn-xs btn-primary">Save</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <form name="users_form" id="users_form" class="form form-horizontal" action="" method="POST">
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="name">Name: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="name" name="name" value="{{user.name}}" class="form-control" placeholder="Enter User's Name" required>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="email">Email: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="email" name="email" value="{{user.email}}" class="form-control" placeholder="Enter User's Email">
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="username">Login Username: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="username" name="username" placeholder="Enter User Username" required value="{{user.username}}" class="form-control">
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="password">Login Password: </label>
+                      <div class="col-lg-10">
+                          <input type="password" id="password" name="password" placeholder="Enter User Password" required value="" class="form-control">
+                          <div class="form_note">* Leave Blank to use retain current password</div>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="status">Active: </label>
+                      <div class="col-lg-10">
+                          <input type="checkbox" class="sw-checkbox" id="status" name="status" value="1" {{"checked" if user.status == 1 or not user}} />
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-md-2 control-label" for="is_admin">Is Admin: </label>
+                      <div class="col-lg-10">
+                          <input type="checkbox" class="sw-checkbox" id="is_admin" name="is_admin" value="1" {{"checked" if user.admin == 1}} />
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="user_brand" class="control-label col-lg-2">
+                          Available Brands<br />
+                          (<a href="javascript:;" onClick="SelectAll('user_brand');">Select All</a>/<a href="javascript:;" onClick="SelectNone('user_brand');">Select None</a>)
+                      </label>
+                      <div class="col-lg-10">
+                          <div class="row">
+                              {% set idx = 0 %}
+                              {% for brand in brands %}
+                              <div class="col-lg-6 form-group">
+                                  <label class="control-label col-lg-7" for="user_brand">{{brand.client}}</label>
+                                  <div class="col-lg-5">
+                                      <input type="checkbox" class="user_brand sw-checkbox" name="user_brand" id="user_brand_{{brand.id}}" value="{{brand.id}}" {{"checked='checked'" if brand.id in user_brands}} />
+                                  </div>
+                              </div>
+                              {% set idx = idx + 1 %}
+                              {% if idx % 2 == 0 %}
+                                  </div><div class="row">
+                              {% endif %}
+                              {% endfor %}
+                          </div>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <button type="submit" class="btn btn-primary">Update user</button>
+                      <a href="{{ url_for('users.users_home') }}" class="btn btn-default">Back to list</a>
+                  </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

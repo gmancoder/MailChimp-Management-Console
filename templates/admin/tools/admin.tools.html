@@ -1,0 +1,77 @@
+{% extends "layouts/admin/layout.folders_lists.html" %}
+{% block tool_buttons %}
+<a href="/admin/tools/new" class="btn btn-xs btn-primary">New Tool</a>
+<a href="/admin/tools/groups/new" class="btn btn-xs btn-primary">New Tool Group</a>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <table width="100%" align="center" cellspacing="0" cellpadding="5" id="tools_table" class="tool_list_table">
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Group</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th class="action_column">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for tool in tools %}
+                <tr>
+                    <td style="width:200px;"><a href="/admin/tools/{{tool.id}}/edit">{{tool.name}}</a></td>
+                    <td style="width:200px;"><a href="/admin/tools/groups/{{tool.group_id}}/edit">{{tool.group.name}}</a></td>
+                    <td style="width:300px;">{{tool.description}}</td>
+                    <td>
+                        <a href="/admin/tools/{{tool.id}}/togglestatus">
+                            {% if tool.status %}
+                            Active
+                            {% else %}
+                            Inactive
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        {% if tool.is_admin != 1 and tool.brands.count() == 0 %}
+                        <a href="/admin/tools/{{tool.id}}/delete" onClick='return confirm("Are you sure?");' class="btn btn-xs btn-danger">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row" id="table_foot_row">
+    <div class="col-md-6 table_foot">
+        Show&nbsp;
+        <select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('tools');">
+            <option value="10" {{"selected" if session['r'] == 10}}>10</option>
+            <option value="25" {{"selected" if session['r'] == 25}}>25</option>
+            <option value="50" {{"selected" if session['r'] == 50}}>50</option>
+            <option value="100" {{"selected" if session['r'] == 100}}>100</option>
+            <option value="0" {{"selected" if session['r'] == 0}}>All</option>
+        </select>
+        &nbsp;Rows
+    </div>
+    <div class="col-md-6 pull-right table_foot" style="text-align:right;">
+        {% if pages > 1 %}
+            {% if current_page > 1 %}
+            <a href="/admin/tools/{{current_page - 1}}" class="page_link">< Prev</a>&nbsp;
+            {% endif %}
+            {% for idx in range(1, (pages + 1)) %}
+                {% if idx == current_page %}
+                <strong>{{idx}}</strong>&nbsp;
+                {% else %}
+                <a href="/admin/tools/{{idx}}">{{idx}}</a>&nbsp;
+                {% endif %}
+            {% endfor %}
+            {% if current_page < pages %}
+            <a href="/admin/tools/{{current_page + 1}}" class="page_link">Next ></a>&nbsp;
+            {% endif %}
+        {% else %}
+            <strong>1</strong>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

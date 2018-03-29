@@ -1,0 +1,24 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('campaigns');" class="campaign_action btn btn-xs btn-primary">Save</a>
+{% if update_type == 'update' %}
+<a href="/campaigns/{{id}}/send" id="send_campaigns_button" class="campaign_action btn btn-xs btn-default">Send</a>
+<a href="/campaigns/{{id}}/send?test=1" id="test_campaigns_button" class="campaign_action btn btn-xs btn-default">Send Test</a>
+<a href="/campaigns/{{id}}/schedule" class="campaign_action btn btn-xs btn-default" id="schedule_campaigns_button">Schedule</a>
+<a href="/campaigns/{{id}}/replicate" class="btn btn-xs btn-default" id="replicate_campaigns_button">Replicate Campaign</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12">
+				<form name="campaigns_form" id="campaigns_form" class="form form-horizontal" action="" method="POST">
+					<input type="hidden" name="update_type" id="update_type" value="{{update_type}}" />
+					{{campaign_form}}
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

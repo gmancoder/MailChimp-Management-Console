@@ -1,0 +1,98 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitTemplateForm('templates');" class="template_action btn btn-xs btn-primary">Save</a>
+<a href="/templates" class="template_action btn btn-xs btn-default">Cancel</a>
+{% endblock %}
+{% block content %}
+<script src="/static/js/ace/ace.js" type="text/javascript"></script>
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12">
+				<ul class="nav nav-tabs" role="tablist">
+				    <li role="presentation" {{'class="active"' if update_type == 'new'}}><a href="#properties" aria-controls="properties" role="tab" data-toggle="tab" onClick="ChangeForm('form');">Template Properties</a></li>
+				    <li role="presentation" {{'class="active"' if update_type != 'new'}}><a href="#edithtml" aria-controls="edithtml" role="tab" data-toggle="tab" {{'class="disabled_tab" onClick="DisabledButton();"' if update_type == 'new' else 'onClick="ChangeForm(\'html\');"'}}>Edit Template HTML</a></li>
+				    <li role="presentation"><a href="#preview" aria-controls="preview" role="tab" data-toggle="tab" {{'class="disabled_tab" onClick="DisabledButton();"' if update_type == 'new' else 'onClick="ChangeForm(\'preview\');LoadPreview(' + template.id|string + ');"'}}>Preview Template</a></li>
+				</ul>
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane {{'active' if update_type == 'new'}}" id="properties">
+						<div class="media">
+						  <div class="media-left">
+						    <a href="#">
+						      <img src="{{template.thumbnail if template.thumbnail != "" else '/static/img/no-thumb.png'}}" style="border:solid 1px #999999;" width="300" alt="{{template.name}}" title="{{template.title}}" />
+						    </a>
+						  </div>
+						  <div class="media-body">
+						    <h4 class="media-heading">{{template.name if update_type != 'new' else "New Template"}}</h4>
+						    {% if update_type != 'new' %}
+						    <strong>Created: </strong>{{template.created}}<br />
+						    <strong>Last Updated: </strong>{{template.updated}}<br />
+						    <strong>Active: </strong>{{template.active}}
+						    {% endif %}
+						  </div>
+						</div>
+						<form name="templates_form" id="templates_form" class="form form-horizontal" action="" method="POST">
+							<input type="hidden" name="templates_html" id="templates_html" value="{{html}}" />
+							{% if update_type == 'new' %}
+							<div class="form-group">
+								<label for="templates_name" class="control-label col-lg-2">Name</label>
+								<div class="col-lg-10">
+									<input type="text" name="templates_name" id="templates_name" class="form-control" maxlength="50" placeholder="Template Name" />
+								</div>
+							</div>
+							{% else %}
+							<input type="hidden" name="templates_name" id="templates_name" value="{{template.name}}" />
+							{% endif %}
+							<div class="form-group">
+								<label for="templates_category_id" class="control-label col-lg-2">Category</label>
+								<div class="col-lg-10">
+									<select name="templates_category_id" id="templates_category_id" class="form-control">
+										{% for category in categories %}
+										<option value="{{category.id}}" {{'selected' if category.id == template.category_id}}>{{category.name}}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<input type="hidden" name="templates_active" id="templates_active" value="{{template.active}}" />
+
+						</form>
+					</div>
+					<div role="tabpanel" class="tab-pane  {{'active' if update_type != 'new'}}" id="edithtml">
+						<div class="row" id="editor_row">
+							<div class="col-md-8">
+								<input type="hidden" name="template_id" id="template_id" value="{{template.id}}" />
+								<pre id="editor">{{html}}</pre>
+							</div>
+							<div class="col-md-4" id="merge_tags_container">
+								<h4>Merge Tags</h4>
+								<div>Click to add to template</div>
+								{% for system_merge_field in system_merge_fields %}
+								<a href="javascript:;" onClick="AddTag('{{system_merge_field.tag}}');" class="btn btn-default merge_tag_button" style="width:100%;"><span>{{system_merge_field.name}}</span></a><br />
+								{% endfor %}
+								{% for name, content in list_merge_fields.items() %}
+								<a href="javascript:;" onClick="ToggleList('{{content['alias']}}');" class="btn btn-default merge_tag_button" style="width:100%;"><span>List: {{name}}</span></a>
+								<div id="{{content['alias']}}" style="display:none;">
+									{% for tag, tag_name in content['tags'].items() %}
+									<a href="javascript:;" onClick="AddTag('*|{{tag}}|*');" class="btn btn-default merge_tag_button" style="width:100%;"><span>{{tag_name}}</span></a><br />
+									{% endfor %}
+								</div>
+								{% endfor %}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p class="pull-right">
+									<a href="javascript:;" onClick="SaveHTML();" class="btn btn-xs btn-primary">Save</a>
+								</p>
+							</div>
+						</div>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="preview">
+						<span id="html_preview"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

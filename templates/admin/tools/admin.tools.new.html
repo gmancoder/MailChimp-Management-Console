@@ -1,0 +1,63 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('tools');" class="btn btn-xs btn-primary">Save</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <form name="tools_form" id="tools_form" class="form form-horizontal" action="" method="POST">
+                    <div class="form-group">
+                        <label for="name" class="control-label col-lg-2">Name: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="name" name="name" onBlur="GenerateAlias('name', 'alias');" class="form-control" value="{{request.form.name}}" placeholder="Enter Tool Name" required> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="name" class="control-label col-lg-2">Alias: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="alias" name="alias" class="form-control" value="{{request.form.alias}}" placeholder="Enter Tool Alias"> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="group_id" class="control-label col-lg-2">Group: </label>
+                        <div class="col-lg-10">
+                            <select name="group_id" id="group_id" class="form-control" required>
+                                <option value="">- Select -</option>
+                                {% for grp in groups %}
+                                <option value="{{grp.id}}" {{"selected" if 'group_id' in request.form and grp.id == request.form['group_id']|int}}>{{grp.name}}</option>
+                                {% endfor %}
+                            </select> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="description" class="control-label col-lg-2">Description: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="description" name="description" class="form-control" placeholder="Enter Tool Description" required value="{{request.form.description}}"> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="rank" class="control-label col-lg-2">Order: </label>
+                        <div class="col-lg-10">
+                            <input type="number" step="any" id="rank" name="rank" class="form-control" placeholder="Enter Tool Rank" required value="{{request.form.rank if request.form.rank != "" else "0"}}"> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="is_admin" class="control-label col-lg-2">Is Admin: </label>
+                        <div class="col-lg-10">
+                            <input type="checkbox" id="is_admin" name="is_admin" class="sw-checkbox" value="1" {{"checked" if request.form.is_admin == '1'}} /> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="home_route" class="control-label col-lg-2">Home Route: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="home_route" name="home_route" class="form-control" placeholder="Enter Tool's Home Route" required value="{{request.form.home_route}}"> 
+        				</div>
+        			</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "layouts/layout.folders_lists.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" class="btn btn-xs btn-default" id="export_tracking_button" onClick="StartTrackingExport({{id}}, '{{activity}}', '{{type}}');">Export {{activity|title}}s</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="search_tracking_button" onClick="StartTrackingSearch();">Search {{activity|title}}s</a>
+{% endblock %}
+{% block breadcrumb_add %}
+<li><a href="/tracking/{{campaign_type}}/{{id}}/detail">{{title}}</a></li>
+<li>{{activity|title}}s {{'(%s)' % type if type != None and type not in ("", "None")}}</li>
+{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<table width="100%" cellspacing="0" cellpadding="5" id="tracking_activity_table" class="tool_list_table">
+			<thead>
+				<tr>
+					<th align="center" style="width:25px;"><input type="checkbox" id="tracking_activity_check_all" name="tracking_activity_check_all" onClick="ToggleAll('tracking_activity_check');" /></th>
+					<th>Email Address</th>
+					{% if activity == 'click' %}
+					<th>URL</th>
+					{% endif %}
+					<th>Timestamp</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for tracking_activity in details %}
+				<tr>
+					<td align="center" style="width:25px;"><input type="checkbox" class="tracking_activity_check" name="check_{{tracking_activity.id}}" id="check_{{tracking_activity.id}}" value="{{tracking_activity.id}}" /></td>
+					<td>{{tracking_activity.list_subscriber.email_address}}</td>
+					{% if activity == 'click' %}
+					<td>{{tracking_activity.url}}</td>
+					{% endif %}
+					<td>{{tracking_activity.timestamp}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" id="table_foot_row">
+	<div class="col-md-6 table_foot">
+		Show&nbsp;
+		<select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('/tracking/{{campaign_type}}/{{id}}/{{activity}}?type={{type}}');">
+			<option value="10" {{"selected" if session['r'] == 10}}>10</option>
+			<option value="25" {{"selected" if session['r'] == 25}}>25</option>
+			<option value="50" {{"selected" if session['r'] == 50}}>50</option>
+			<option value="100" {{"selected" if session['r'] == 100}}>100</option>
+			<option value="0" {{"selected" if session['r'] == 0}}>All</option>
+		</select>
+		&nbsp;Rows
+	</div>
+	<div class="col-md-6 pull-right table_foot" style="text-align:right;">
+		{% if pages > 1 %}
+			{% if current_page > 1 %}
+			<a href="/tracking/{{campaign_type}}/{{id}}/{{activity}}/{{current_page - 1}}?type={{type}}" class="page_link">< Prev</a>&nbsp;
+			{% endif %}
+			{% for idx in range((1 if current_page <= 4 else current_page - 4), (current_page + 6)) %}
+				{% if idx == current_page %}
+				<strong>{{idx}}</strong>&nbsp;
+				{% else %}
+				<a href="/tracking/{{campaign_type}}/{{id}}/{{activity}}/{{idx}}?type={{type}}">{{idx}}</a>&nbsp;
+				{% endif %}
+			{% endfor %}
+			{% if current_page < pages %}
+			<a href="/tracking/{{campaign_type}}/{{id}}/{{activity}}/{{current_page + 1}}?type={{type}}" class="page_link">Next ></a>&nbsp;
+			{% endif %}
+		{% else %}
+			<strong>1</strong>
+		{% endif %}
+	</div>
+</div>
+<!-- Export Modal -->
+<div class="modal fade" id="export_tracking_modal" tabindex="-1" role="dialog" aria-labelledby="export_tracking_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="export_tracking_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="export_tracking_modal_label">Export {{activity|title}}s</h4>
+			</div>
+			<div class="modal-body">
+				<div id="export_tracking_modal_loading" style="text-align:center;display:none;">
+					<img src="/static/img/ajax-loader.gif" alt="Loading" />
+					<div id="export_tracking_modal_loading_action"></div>
+				</div>
+				<form class="form form-horizontal" id="export_tracking_form" action="" method="POST" onSubmit="return false;">
+					<div class="form-panel" id="export_tracking_general">
+						<input type="hidden" name="export_tracking_id" id="export_tracking_id" value="{{id}}" />
+						<input type="hidden" name="export_tracking_target_activity" id="export_tracking_target_activity" value="{{activity}}" />
+						<input type="hidden" name="export_tracking_target_type" id="export_tracking_target_type" value="{{type}}" />
+						<div class="form-group">
+							<label for="export_tracking_file" class="control-label col-lg-2">File Name</label>
+							<div class="col-lg-8">
+								<input type="text" name="export_tracking_file" id="export_tracking_file" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="export_tracking_file_delimiter" class="control-label col-lg-2">File Delimiter</label>
+							<div class="col-lg-10">
+								<input type="text" name="export_tracking_file_delimiter" id="export_tracking_file_delimiter" value="," class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="export_tracking_notification" class="control-label col-lg-2">Notify On Completion</label>
+							<div class="col-lg-10">
+								<input type="text" name="export_tracking_notification" id="export_tracking_notification" value="{{g.user.email}}" class="form-control" />
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="export_tracking_modal_continue_button" onClick="TrackingExportModalContinue();" class="btn btn-primary">Continue</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('export_tracking_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>
+<!-- Search Modal -->
+<div class="modal fade" id="search_tracking_modal" tabindex="-1" role="dialog" aria-labelledby="search_tracking_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="search_tracking_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="search_tracking_modal_label">Search {{activity|title}}s</h4>
+			</div>
+			<div class="modal-body">
+				<div id="search_tracking_modal_loading" style="text-align:center;display:none;">
+					<img src="/static/img/ajax-loader.gif" alt="Loading" />
+					<div id="search_tracking_modal_loading_action"></div>
+				</div>
+				<form class="form form-horizontal" id="search_tracking_form" action="" method="POST" onSubmit="return false;">
+					<input type="hidden" name="search_tracking_current_step" id="search_current_step" value="search_tracking_general" />
+					<div class="form-panel" id="search_tracking_general">
+						<input type="hidden" name="search_tracking_id" id="search_tracking_id" value="{{id}}" />
+						<input type="hidden" name="search_tracking_target_activity" id="search_tracking_target_activity" value="{{activity}}" />
+						<input type="hidden" name="search_tracking_target_type" id="search_tracking_target_type" value="{{type}}" />
+						<div class="form-group">
+							<label for="search_tracking_contains" class="col-lg-12">Email Address Contains</label><br />
+							<div class="col-lg-12">
+								<input type="text" name="search_tracking_contains" id="search_tracking_contains" value="" class="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="form-panel" id="search_tracking_results" style="display:none;">
+						<h5>Results</h5>
+						<div id="search_tracking_results_form">
+							<table name="search_tracking_results_table" id="search_tracking_results_table" width="100%">
+							</table>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="search_tracking_modal_back_button" style="display:none;" onClick="TrackingSearchModalBack();" class="btn btn-default">Back</button>
+				<button type="button" id="search_tracking_modal_continue_button" onClick="TrackingSearchModalContinue();" class="btn btn-primary">Continue</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('search_tracking_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>
+{% endblock %}

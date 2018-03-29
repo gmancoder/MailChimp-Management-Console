@@ -1,0 +1,226 @@
+<!-- Import Modal -->
+<div class="modal fade" id="import_modal" tabindex="-1" role="dialog" aria-labelledby="import_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="import_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="import_modal_label">Import {{g.current_tool.name}}</h4>
+			</div>
+			<div class="modal-body">
+				<div id="import_modal_loading" style="text-align:center;display:none;">
+					<img src="/static/img/ajax-loader.gif" alt="Loading" />
+					<div id="import_modal_loading_action"></div>
+				</div>
+				<form class="form form-horizontal" id="import_form" action="" method="POST" onSubmit="return false;">
+					<input type="hidden" name="import_current_step" id="import_current_step" value="import_general" />
+					<div class="form-panel" id="import_general">
+						<input type="hidden" name="import_folder_id" id="import_folder_id" value="{{g.current_folder.id}}" />
+						<input type="hidden" name="import_target_type" id="import_target_type" value="{{g.current_tool.alias}}" />
+						<div class="form-group">
+							<label for="import_file" class="control-label col-lg-2">File</label>
+							<div class="col-lg-8">
+								<input type="text" name="import_file" id="import_file" class="form-control" readonly />
+							</div>
+							<div class="col-lg-2">
+								<a href="javascript:;" onClick="ShowImportFileModal();" class="btn btn-success">Select</a>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="import_file_delimiter" class="control-label col-lg-2">File Delimiter</label>
+							<div class="col-lg-10">
+								<input type="text" name="import_file_delimiter" id="import_file_delimiter" value="," class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="import_type" class="control-label col-lg-2">Import Type</label>
+							<div class="col-lg-10">
+								<select name="import_type" id="import_type" class="form-control" required>
+									<option value="1">Add and Update</option>
+									<option value="2">Add Only</option>
+									<option value="3">Update Only</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="import_notification" class="control-label col-lg-2">Notify On Completion</label>
+							<div class="col-lg-10">
+								<input type="text" name="import_notification" id="import_notification" value="{{g.user.email}}" class="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="form-panel" id="import_mapping" style="display:none;">
+						<h5>Setup Mapping</h5>
+						<div id="import_mapping_form">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="import_modal_back_button" style="display:none;" onClick="ImportModalBack();" class="btn btn-default">Back</button>
+				<button type="button" id="import_modal_continue_button" onClick="ImportModalContinue();" class="btn btn-primary">Continue</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('import_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>
+<!-- Import File Selection Modal -->
+<div class="modal fade" id="import_file_selection_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4 class="modal-title" id="myModalLabel">Select Import File</h4>
+		</div>
+		<div class="modal-body">
+			<div id="import_file_selection_modal_loading" style="text-align:center;display:none;">
+				<img src="/static/img/ajax-loader.gif" alt="Loading" />
+				<div id="import_file_selection_modal_loading_action"></div>
+			</div>
+			<form class="form form-horizontal" id="import_file_selection_form" action="" method="POST" onSubmit="return false;">
+				<div class="form-group">
+					<label for="import_file" class="control-label col-lg-2">File<br />(<a href="javascript:;" onClick="RefreshImportFileList();">Refresh</a>)
+					<div class="col-lg-10">
+						<div id="import_file_selection_files">
+							<ul id="import_file_selection_file_list">
+							</ul>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" onClick="SelectImportFile();" class="btn btn-primary">Continue</nutton>
+			<button type="button" class="btn btn-default" onClick="ResetModal('import_file_selection_modal');" data-dismiss="modal">Cancel</button>
+		</div>
+  	</div>
+  </div>
+</div>
+<!-- Export Modal -->
+<div class="modal fade" id="export_modal" tabindex="-1" role="dialog" aria-labelledby="export_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="export_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="export_modal_label">Export {{g.current_tool.name}}</h4>
+			</div>
+			<div class="modal-body">
+				<div id="export_modal_loading" style="text-align:center;display:none;">
+					<img src="/static/img/ajax-loader.gif" alt="Loading" />
+					<div id="export_modal_loading_action"></div>
+				</div>
+				<form class="form form-horizontal" id="export_form" action="" method="POST" onSubmit="return false;">
+					<input type="hidden" name="export_current_step" id="export_current_step" value="export_general" />
+					<div class="form-panel" id="export_general">
+						<input type="hidden" name="export_folder_id" id="export_folder_id" value="{{g.current_folder.id}}" />
+						<input type="hidden" name="export_target_type" id="export_target_type" value="{{g.current_tool.alias}}" />
+						<div class="form-group">
+							<label for="export_file" class="control-label col-lg-2">File Name</label>
+							<div class="col-lg-8">
+								<input type="text" name="export_file" id="export_file" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="export_file_delimiter" class="control-label col-lg-2">File Delimiter</label>
+							<div class="col-lg-10">
+								<input type="text" name="export_file_delimiter" id="export_file_delimiter" value="," class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="export_type" class="control-label col-lg-2">Export Type</label>
+							<div class="col-lg-10">
+								<select name="export_type" id="export_type" class="form-control" required>
+									<option value="1">All {{g.current_tool.alias.replace('_', ' ').title()}}</option>
+									<option value="2">Selected {{g.current_tool.alias.replace('_', ' ').title()}}</option>
+									<option value="3">{{g.current_tool.alias.replace('_', ' ').title()}} In Current Folder</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="export_notification" class="control-label col-lg-2">Notify On Completion</label>
+							<div class="col-lg-10">
+								<input type="text" name="export_notification" id="export_notification" value="{{g.user.email}}" class="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="form-panel" id="export_fields" style="display:none;">
+						<h5>Select Fields</h5>
+						<a href="javascript:;" class="btn btn-xs btn-default" onClick="SelectAll('export-field');">Select All</a>
+						<a href="javascript:;" class="btn btn-xs btn-default" onClick="UnSelectAll('export-field');">Select None</a>
+						<div id="export_fields_form">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="export_modal_back_button" style="display:none;" onClick="ExportModalBack();" class="btn btn-default">Back</button>
+				<button type="button" id="export_modal_continue_button" onClick="ExportModalContinue();" class="btn btn-primary">Continue</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('export_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>
+<!-- Search Modal -->
+<div class="modal fade" id="search_modal" tabindex="-1" role="dialog" aria-labelledby="search_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="search_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="search_modal_label">Search {{g.current_tool.name}}</h4>
+			</div>
+			<div class="modal-body">
+				<div id="search_modal_loading" style="text-align:center;display:none;">
+					<img src="/static/img/ajax-loader.gif" alt="Loading" />
+					<div id="search_modal_loading_action"></div>
+				</div>
+				<form class="form form-horizontal" id="search_form" action="" method="POST" onSubmit="return false;">
+					<input type="hidden" name="search_current_step" id="search_current_step" value="search_general" />
+					<div class="form-panel" id="search_general">
+						<input type="hidden" name="search_folder_id" id="search_folder_id" value="{{g.current_folder.id}}" />
+						<input type="hidden" name="search_target_type" id="search_target_type" value="{{g.current_tool.alias}}" />
+						<div class="form-group" id="search_type_control">
+							<label for="search_type" class="control-label col-lg-2">Search Type</label>
+							<div class="col-lg-10">
+								<select name="search_type" id="search_type" class="form-control" required>
+									<option value="1">All {{g.current_tool.alias.replace('_', ' ').title()}}</option>
+									<option value="2">{{g.current_tool.alias.replace('_', ' ').title()}} In Current Folder</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="search_for" class="control-label col-lg-2">Search For</label>
+							<div class="col-lg-8">
+								<select name="search_for" class="form-control" id="search_for" required>
+									<option value=""></option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="search_contains" class="control-label col-lg-2">Containing</label>
+							<div class="col-lg-10">
+								<input type="text" name="search_contains" id="search_contains" value="" class="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="form-panel" id="search_results" style="display:none;">
+						<h5>Results</h5>
+						<div id="search_results_form">
+							<table name="search_results_table" id="search_results_table" width="100%">
+							</table>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="search_modal_back_button" style="display:none;" onClick="SearchModalBack();" class="btn btn-default">Back</button>
+				<button type="button" id="search_modal_continue_button" onClick="SearchModalContinue();" class="btn btn-primary">Continue</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('search_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>

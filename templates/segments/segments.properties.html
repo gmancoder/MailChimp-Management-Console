@@ -1,0 +1,195 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('segments');" class="segment_action btn btn-xs btn-primary">Save</a>
+<a href="/segments" class="segment_action btn btn-xs btn-default">Cancel</a>
+{% endblock %}
+{% block content %}
+<script type="text/javascript">
+	{% if id != None %}
+		var current_segment_id = {{id}};
+	{% endif %}
+	$(document).ready(function() {
+		
+		{% if id != None %}
+			$('#export_modal_label').html('Export Segment Subscribers');
+			$('#export_folder_id').val(current_segment_id);
+			$('#export_target_type').val('segment_subscribers');
+			$('#export_type option').remove();
+			$('#export_type').append(CreateDynamicOption("1", "All Segment Subscribers"));
+			$('#export_type').append(CreateDynamicOption("2", "Selected Subscribers"));
+
+			//Search Modal
+			$('#search_modal_label').html('Search Segment Subscribers');
+			$('#search_folder_id').val(current_segment_id);
+			$('#search_target_type').val('segment_subscribers');
+			$('#search_type_control').hide();
+
+			SubscriberPage(1);
+		{% endif %}
+	});
+	var list_subscribers = [
+	{% for subscriber in subscribers %}
+		{{subscriber}},
+	{% endfor %}
+	];
+</script>
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12">
+				{% if id != None %}
+				<ul class="nav nav-tabs" role="tablist">
+				    <li role="presentation" class="active"><a href="#properties" onClick="ToggleActions('properties');" aria-controls="properties" role="tab" data-toggle="tab">Properties</a></li>
+				    <li role="presentation"><a href="#subscribers" onClick="ToggleActions('subscribers');" aria-controls="subscribers" role="tab" data-toggle="tab">Subscribers</a></li>
+				</ul>
+
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="properties">
+				{% endif %}
+						<form name="segments_form" id="segments_form" class="form form-horizontal" method="POST">
+							{{form}}
+							<fieldset id="segment_conditions" style="display:none;">
+								<legend>Conditions</legend>
+								<div id="segment_conditions_loading" style="text-align:center;display:none;">
+									<img src="/static/img/ajax-loader.gif" alt="Loading" />
+									<div id="segment_conditions_loading_action"></div>
+								</div>
+								<div id="segment_condition_form">
+									<p><a href="javascript:;" onClick="ShowAddConditionForm();" class="btn btn-default btn-xs">Show/Hide New Condition Form</a></p>
+									<div id="add_new_condition_form" style="display:none;">
+										<div class="form-group">
+											<label for="segment_condition_field" class="col-lg-2 control-label">Field</label>
+											<div class="col-lg-10">
+												<select name="segment_condition_field" id="segment_condition_field" class="form-control"></select>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="segment_condition_op" class="col-lg-2 control-label">Op</label>
+											<div class="col-lg-10">
+												<select name="segment_condition_op" id="segment_condition_op" class="form-control"></select>
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="segment_condition_value" class="col-lg-2 control-label">Value</label>
+											<div class="col-lg-10">
+												<input type="text" name="segment_condition_value" id="segment_condition_value" class="form-control" />
+											</div>
+										</div>
+										<div class="form-group">
+											<a href="javascript:;" onClick="AddNewCondition();" class="btn btn-xs btn-success">Add</a>
+										</div>
+									</div>
+									<table id="segment_conditions_table" width="100%" name="segment_conditions_table">
+										<thead>
+											<tr>
+												<th>Field</th>
+												<th>Op</th>
+												<th>Value</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody id="segment_conditions_table_body">
+										{% for condition in conditions %}
+											<tr class="condition_row">
+												<td>{{condition.field}}</td>
+												<td>{{condition.op}}</td>
+												<td>{{condition.value}}</td>
+												<td>
+													<input type="hidden" name="segment_condition" value="{{condition.type}}|{{condition.field}}|{{condition.op}}|{{condition.value}}" />
+													<a href="javascript:;" onClick="RemoveCondition(this);" class="btn btn-xs btn-danger">Remove</a>
+												</td>
+											</tr>
+										{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</fieldset>
+							<fieldset id="segment_subscribers" style="display:none;">
+								<legend>Select Subscribers</legend>
+								<div id="segment_subscribers_loading" style="text-align:center;display:none;">
+									<img src="/static/img/ajax-loader.gif" alt="Loading" />
+									<div id="segment_subscribers_loading_action"></div>
+								</div>
+								<div class="row" id="segment_subscribers_form">
+									<div class="col-md-5">
+										<select name="list_subscriber_id_source" id="list_subscriber_id_source" multiple="multiple" class="form-control" style="height:200px;">
+										</select>
+									</div>
+									<div class="col-md-2" style="text-align:center;">
+										<a href="javascript:;" id="subscribers_from_source" class="btn btn-xs btn-default" onClick="AddSubscribers();" title="Add Selected Subscribers"> > </a><br />
+										<a href="javascript:;" id="subscribers_from_source" class="btn btn-xs btn-default" onClick="AddAllSubscribers();" title="Add All Subscribers"> >> </a><br />
+										<a href="javascript:;" id="subscribers_from_target" class="btn btn-xs btn-default" onClick="RemoveSubscribers();" title="Remove Selected Subscribers"> < </a><br />
+										<a href="javascript:;" id="subscribers_from_target" class="btn btn-xs btn-default" onClick="RemoveAllSubscribers();" title="Remove All Subscribers"> << </a>
+									</div>
+									<div class="col-md-5">
+										<select name="list_subscriber_id" id="list_subscriber_id" multiple="multiple" class="form-control" style="height:200px;"></select>
+										<input type="hidden" name="selected_subscribers" id="selected_subscribers" />
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					{% if id != None %}
+					</div>
+					<div role="tabpanel" class="tab-pane" id="subscribers">
+						<div class="row" id="list_button_row"> 
+							<div class="col-md-10">
+								<a href="javascript:;" onClick="StartExport();" class="btn btn-xs btn-default">Export</a>
+								<a href="javascript:;" onClick="StartSearch();" class="btn btn-xs btn-default">Search</a>
+								<a href="javascript:;" onClick="RefreshSegment();" class="btn btn-xs btn-default">Refresh</a>
+							</div>
+							<div class="col-md-2 pull-right" style="text-align:right;">
+								{% if type == 'static' %}
+								<a href="javascript:;" class="btn btn-xs btn-danger" onClick="DeleteSelectedSubscribers();" id="delete_objects_button" disabled="disabled">Remove Selected</a>
+								{% endif %}
+							</div>
+							<div style="clear:both;"></div>
+						</div>
+						<div id="segment_subscribers_loading" style="text-align:center;display:none;">
+							<img src="/static/img/ajax-loader.gif" alt="Loading" />
+							<div id="segment_subscribers_loading_action"></div>
+						</div>
+						<div id="segment_subscriber_container" style="display:none;">
+							<div class="row">
+								<div class="col-md-12">
+									<table width="100%" cellspacing="0" cellpadding="5" id="segment_subscribers_table" class="tool_list_table display nowrap">
+										<thead >
+											<tr id="segment_subscriber_table_head">
+												<th align="center" style="width:25px;"><input type="checkbox" id="segment_subscribers_check_all" name="segment_subscribers_check_all" onClick="ToggleAll('segment_subscribers_check');" /></th>
+												<th style="width:50px">ID</th>
+												<th style="width:400px;">Email Address</th>
+												<th style="width:150px">Email Type Preference</th>
+												<th style="width:200px">Date Added</th>
+												<th style="width:200px">Last Modified</th>
+											</tr>
+										</thead>
+										<tbody id="segment_subscribers_table_body">
+											
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="row" id="table_foot_row">
+								<div class="col-md-6 table_foot">
+									Show&nbsp;
+									<select name="rows" id="show_rows" class="show_rows" onChange="ChangeSubscriberShowRows();">
+										<option value="10">10</option>
+										<option value="25">25</option>
+										<option value="50" selected>50</option>
+										<option value="100">100</option>
+										<option value="0">All</option>
+									</select>
+									&nbsp;Rows
+								</div>
+								<div class="col-md-6 pull-right table_foot" style="text-align:right;" id="subscriber_pagination"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% include "blocks/ies_modals.html" %}
+{% include "blocks/loading_modal.html" %}
+{% endblock %}

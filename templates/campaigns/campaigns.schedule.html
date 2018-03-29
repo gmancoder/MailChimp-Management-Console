@@ -1,0 +1,44 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<form name="schedule_form" id="schedule_form" class="form form-horizontal" action="" method="POST">
+			<input type="hidden" name="referrer" id="referrer" value="{{referrer}}" />
+			<div class="form-group">
+				<label for="campaign_name" class="control-label col-lg-2">Campaign: </label>
+				<div class="col-lg-10">
+					{{name}}
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="campaign_date_time" class="control-label col-lg-2">Date and Time: </label>
+				<div class="col-lg-5">
+					<input type="text" id="campaign_date" class="form-control" name="campaign_date" value="{{campaign_date}}" />
+				</div>
+				<div class="col-lg-5">
+					<select name="campaign_time" id="campaign_time" class="form-control">
+						{% for time in times %}
+						<option value="{{time}}" {{'selected' if time == campaign_time}}>{{time}}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="campaign_name" class="control-label col-lg-2">Time Zone: </label>
+				<div class="col-lg-10">
+					<select name="timezone" id="timezone" class="form-control">
+						{% for tz in timezones %}
+						<option value="{{tz}}" {{'selected' if tz == timezone}}>{{tz}}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<input type="submit" class="btn btn-primary" value="Schedule Email" />
+				<a href="javascript:history.go(-1);" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

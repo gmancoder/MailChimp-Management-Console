@@ -1,0 +1,56 @@
+
+from models.TOOL_ALIAS import *
+@content.route('/TOOL_ALIAS')
+@content.route('/TOOL_ALIAS/<int:page>')
+@login_required
+def TOOL_ALIAS(page=1):
+    query = TOOL_NAME_SINGLE.query.filter(TOOL_NAME_SINGLE.folder_id == g.current_folder.id)
+    r = request.args.get('r')
+    q = request.args.get('q')
+    if not r:
+        if 'r' in session:
+            r = int(session['r'])
+        else:
+            r = DEFAULT_LIST_LENGTH
+            session['r'] = r
+    else:
+        r = int(r)
+        session['r'] = r
+    if r != 0:
+        pages = query.count() / r;
+        if q:
+            TOOL_ALIAS = query.filter(TOOL_NAME_SINGLE.name.like('%%%s%%' % q)).order_by(TOOL_NAME_SINGLE.name).paginate(page, r, False).items
+        else:
+            TOOL_ALIAS = query.order_by(TOOL_NAME_SINGLE.name).paginate(page,r,False).items
+    else:
+        pages = 0
+        if q:
+            TOOL_ALIAS = query.filter(TOOL_NAME_SINGLE.name.like('%%%s%%' % q)).order_by(TOOL_NAME_SINGLE.name).all()
+        else:
+            TOOL_ALIAS = query.order_by(TOOL_NAME_SINGLE.name).all()
+
+    logf.AddLog(Log(g.current_brand.id, g.current_tool.id, g.user.id, request.path, op='Retrieve', rows=len(TOOL_ALIAS)))
+    return render_template('TOOL_ALIAS/TOOL_ALIAS.default.html', title="All TOOL_NAME_SINGLE", TOOL_ALIAS=TOOL_ALIAS, pages=pages, current_page=page, rows=r, q=q)
+
+@content.route('/TOOL_ALIAS/new', methods=['GET', 'POST'])
+@content.route('/TOOL_ALIAS/<int:id>/detail', methods=['GET', 'POST'])
+@login_required
+def TOOL_ALIAS_SINGLE_details(id=None):
+    TOOL_ALIAS_SINGLE = TOOL_NAME_SINGLE()
+    mode = "new"
+    mode_title = "New TOOL_NAME_SINGLE"
+    log_op = 'Create'
+    
+    if id != None:
+        TOOL_ALIAS_SINGLE = TOOL_NAME_SINGLE.query.filter(and_(TOOL_NAME_SINGLE.brand_id == g.current_brand.id, TOOL_NAME_SINGLE.id == id)).first()
+        if not TOOL_ALIAS_SINGLE:
+            msg = 'TOOL_NAME_SINGLE not found'
+            flash(msg, 'error')
+            logf.AddLog(Log(g.current_brand.id, g.current_tool.id, g.user.id, request.path, op='Update', e_resp="Error", e_resp_msg=msg))
+            return redirect('/TOOL_ALIAS')
+        mode = "update"
+        mode_title = TOOL_ALIAS_SINGLE.name
+        log_op = 'Update'
+    
+    if request.method == 'GET':
+        return render_template('TOOL_ALIAS/TOOL_ALIAS.properties.html', title=mode_title, update_type=mode, TOOL_ALIAS_SINGLE=TOOL_ALIAS_SINGLE)

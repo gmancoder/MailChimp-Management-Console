@@ -1,0 +1,32 @@
+<!-- Import File Selection Modal -->
+<div class="modal fade" id="import_file_selection_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Select Import File</h4>
+        </div>
+        <div class="modal-body">
+            <div id="import_file_selection_modal_loading" style="text-align:center;display:none;">
+                <img src="/static/img/ajax-loader.gif" alt="Loading" />
+                <div id="import_file_selection_modal_loading_action"></div>
+            </div>
+            <form class="form form-horizontal" id="import_file_selection_form" action="" method="POST" onSubmit="return false;">
+                <div class="form-group">
+                    <label for="import_file" class="control-label col-lg-2">File<br />(<a href="javascript:;" onClick="RefreshImportFileList();">Refresh</a>)
+                    <div class="col-lg-10">
+                        <div id="import_file_selection_files">
+                            <ul id="import_file_selection_file_list">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onClick="SelectImportFile();" class="btn btn-primary">Continue</nutton>
+            <button type="button" class="btn btn-default" onClick="ResetModal('import_file_selection_modal');" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+  </div>
+</div>

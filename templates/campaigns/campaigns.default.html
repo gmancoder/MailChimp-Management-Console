@@ -1,0 +1,80 @@
+{% extends "layouts/layout.folders_lists.html" %}
+{% block tool_buttons %}
+<a href="/campaigns/new" class="btn btn-xs btn-primary">New Campaign</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="schedule_campaigns_button" disabled="disabled">Schedule</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="unschedule_campaigns_button" disabled="disabled">Cancel Schedule</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="test_campaigns_button" disabled="disabled">Send Test</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="send_campaigns_button" disabled="disabled">Send</a>
+<a href="javascript:;" class="btn btn-xs btn-default" id="replicate_campaigns_button" disabled="disabled">Replicate Campaign</a>
+{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<table width="100%" cellspacing="0" cellpadding="5" id="campaigns_table" class="tool_list_table">
+			<thead>
+				<tr>
+					<th align="center" style="width:25px;"><input type="checkbox" id="campaigns_check_all" name="campaigns_check_all" onClick="ToggleAll('campaigns_check');" /></th>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Subject Line</th>
+					<th>Status</th>
+					<th>Created</th>
+					<th>Last Updated</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for campaign in campaigns %}
+				<tr>
+					<td align="center" style="width:25px;"><input type="checkbox" class="campaigns_check" name="check_{{campaign.id}}" id="check_{{campaign.id}}" value="{{campaign.id}}" /></td>
+					<td>{{campaign.id}}</td>
+					<td>
+						{% if campaign.status in ('save') %}
+						<a href="/campaigns/{{campaign.id}}/detail">{{campaign.name}}</a>
+						{% else %}
+						{{campaign.name}}
+						{% endif %}
+					</td>
+					<td>{{campaign.subject_line}}</td>
+					<td id="status_field_{{campaign.id}}">{{campaign.status}}</td>
+					<td>{{campaign.created}}</td>
+					<td>{{campaign.updated}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" id="table_foot_row">
+	<div class="col-md-6 table_foot">
+		Show&nbsp;
+		<select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('campaigns');">
+			<option value="10" {{"selected" if session['r'] == 10}}>10</option>
+			<option value="25" {{"selected" if session['r'] == 25}}>25</option>
+			<option value="50" {{"selected" if session['r'] == 50}}>50</option>
+			<option value="100" {{"selected" if session['r'] == 100}}>100</option>
+			<option value="0" {{"selected" if session['r'] == 0}}>All</option>
+		</select>
+		&nbsp;Rows
+	</div>
+	<div class="col-md-6 pull-right table_foot" style="text-align:right;">
+		{% if pages > 1 %}
+			{% if current_page > 1 %}
+			<a href="/campaigns/{{current_page - 1}}" class="page_link">< Prev</a>&nbsp;
+			{% endif %}
+			{% for idx in range(1, (pages + 1)) %}
+				{% if idx == current_page %}
+				<strong>{{idx}}</strong>&nbsp;
+				{% else %}
+				<a href="/campaigns/{{idx}}">{{idx}}</a>&nbsp;
+				{% endif %}
+			{% endfor %}
+			{% if current_page < pages %}
+			<a href="/campaigns/{{current_page + 1}}" class="page_link">Next ></a>&nbsp;
+			{% endif %}
+		{% else %}
+			<strong>1</strong>
+		{% endif %}
+	</div>
+</div>
+</div>
+{% endblock %}

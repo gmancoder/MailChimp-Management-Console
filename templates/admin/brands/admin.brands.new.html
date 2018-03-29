@@ -1,0 +1,76 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('brands');" class="btn btn-xs btn-primary">Save</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <form name="brands_form" id="brands_form" class="form form-horizontal" action="" method="POST">
+                    <div class="form-group">
+                        <label for="mid" class="control-label col-lg-2">MID: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="mid" name="mid" class="form-control" value="{{request.form.mid}}" placeholder="Enter MID" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="client_name" class="control-label col-lg-2">Client Name: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="client_name" name="client_name" class="form-control" value="{{request.form.client_name}}" placeholder="Enter Client Name" required> 
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="api_user" class="control-label col-lg-2">API Username: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="api_user" name="api_user" class="form-control" value="{{request.form.api_user}}" placeholder="Enter API Username" required> 
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="api_key" class="control-label col-lg-2">API Password: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="api_key" name="api_key" class="form-control" value="{{request.form.api_key}}" placeholder="Enter API Password" required /> 
+                        </div>
+                        
+                    </div>
+                    <div class="form-group">
+                        <label for="api_dc" class="control-label col-lg-2">Server Version: </label>
+                        <div class="col-lg-10">
+                            <input type="text" name="api_dc" id="api_dc" class="form-control" value="{{request.form.api_dc}}" placeholder="Enter Server Version" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="status" class="control-label col-lg-2">Active: </label>
+                        <div class="col-lg-10">
+                            <input type="checkbox" id="status" name="status" class="sw-checkbox" value="1" {{"checked='checked'" if request.form.status == "1" or not request.form}} />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="brand_tool" class="control-label col-lg-2">
+                            Available Tools<br />
+                            (<a href="javascript:;" onClick="SelectAll('brand_tool');">Select All</a>/<a href="javascript:;" onClick="SelectNone('brand_tool');">Select None</a>)
+                        </label>
+                        <div class="col-lg-10">
+                            <div class="row">
+                                {% set idx = 0 %}
+                                {% for tool in tools %}
+                                <div class="col-lg-6 form-group">
+                                    <label class="control-label col-lg-7" for="brand_tool">{{tool.name}}</label>
+                                    <div class="col-lg-5">
+                                        <input type="checkbox" class="brand_tool sw-checkbox" name="brand_tool" id="brand_tool_{{tool.id}}" value="{{tool.id}}" {{"checked='checked'" if tool.id|string in request.form.brand_tool}} />
+                                    </div>
+                                </div>
+                                {% set idx = idx + 1 %}
+                                {% if idx % 2 == 0 %}
+                                    </div><div class="row">
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

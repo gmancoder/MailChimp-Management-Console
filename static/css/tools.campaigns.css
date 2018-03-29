@@ -1,0 +1,9 @@
+.send-checklist-success {
+	color:green;
+}
+.send-checklist-warning {
+	color:orange;
+}
+.send-checklist-error {
+	color:red;
+}

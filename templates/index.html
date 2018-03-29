@@ -1,0 +1,16 @@
+{% extends "layouts/layout.html" %}
+{% block body %}
+<form class="form-horizontal" action="/search" method="POST">
+    <div class="form-group">
+        <label class="col-md-2 control-label">Search Term</label>
+
+        <div class="col-md-8">
+            <input type="text" id="q" name="q" class="form-control" placeholder="Search Term" required>
+        </div>
+
+        <div class="col-md-2">
+            <input type="submit" class="btn btn-primary" value="Submit">
+        </div>
+    </div>
+</form>
+{% endblock %}

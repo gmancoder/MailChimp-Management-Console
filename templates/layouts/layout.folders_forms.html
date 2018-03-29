@@ -1,0 +1,84 @@
+{% extends "layouts/layout.html" %}
+{% block head %}
+<script src="/static/js/tools.{{g.current_tool.alias}}.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/tools.{{g.current_tool.alias}}.css" type="text/css" />
+{% endblock %}
+{% block body %}
+{% if g.current_folder != None %}
+<span id="current_folder_span">{{g.current_folder.id}}</span>
+{% endif %}
+<div class="row-fluid">
+	<div class="col-md-3" id="folder_list_container">
+		<div class="row">
+			<div class="col-md-12" id="folders">
+				<ul>
+					{% for folder in g.folders %}
+					{{ folder.drawFolderTree(g.current_folder) }}
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-9" id="form_container">
+		<div class="row" id="breadcrumb_row">
+			<div class="col-xs-1" id="show_hide_folders_button">
+				<a href="javascript:;" class="btn btn-xs btn-default"  onClick="toggleFolderView('form');">
+					<img src="/static/img/hide.png" alt="<" width="16" title="Hide Folders" />
+				</a>
+			</div>
+			<div class="col-md-11">
+				<!-- Breadcrumbs -->
+				<ol class="breadcrumb">
+					{% if g.current_folder != None %}
+					{{ g.current_folder.drawBreadCrumb("", -1) }}
+					<li><strong>{{title}}</strong></li>
+					{% endif %}
+				</ol>
+			</div>
+		</div>
+		<div class="row" id="list_button_row">
+			<div class="col-md-12">
+				{% block tool_buttons %}{% endblock %}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12" id="form_row">
+				{% block content %}{% endblock %}
+			</div>
+		</div>
+	</div>
+</div>
+<!-- New Folder Modal -->
+<div class="modal fade" id="new_folder_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="new_folder_modal_loading" style="text-align:center;display:none;">
+			<img src="/static/img/ajax-loader.gif" alt="Loading" />
+			<div id="new_folder_modal_loading_action"></div>
+		</div>
+    	<div id="new_folder_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel">New Folder</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form form-horizontal" id="new_folder_form" action="" method="POST" onSubmit="NewFolderSubmit('{{g.current_tool.alias}}');return false;">
+					<input type="hidden" name="parent_folder_id" id="parent_folder_id" value="" />
+					<input type="hidden" name="submit_type" id="submit_type" value="" />
+					<div class="form-group">
+						<label for="new_folder_name" class="control-label col-lg-2">Folder Name</label>
+						<div class="col-lg-10">
+							<input type="text" name="new_folder_name" id="new_folder_name" class="form-control" />
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" onClick="NewFolderSubmit('{{g.current_tool.alias}}');" class="btn btn-primary">Submit</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('new_folder_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+</div>
+{% include "blocks/ies_modals.html" %}
+{% endblock %}

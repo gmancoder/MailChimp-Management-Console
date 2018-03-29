@@ -1,0 +1,22 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('ab_tests');" class="btn btn-xs btn-primary">Save</a>
+{% if update_type == 'update' %}
+<a href="/ab_tests/{{id}}/send" id="send_ab_tests_button" class="campaign_action btn btn-xs btn-default">Begin A/B Test</a>
+<a href="/ab_tests/{{id}}/schedule" class="campaign_action btn btn-xs btn-default" id="schedule_ab_tests_button">Schedule</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12">
+				<form name="ab_tests_form" id="ab_tests_form" class="form form-horizontal" action="" method="POST">
+					<input type="hidden" name="update_type" id="update_type" value="{{update_type}}" />
+					{{ab_test_form}}
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

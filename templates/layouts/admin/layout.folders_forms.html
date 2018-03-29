@@ -1,0 +1,66 @@
+{% extends "layouts/layout.html" %}
+{% block head %}
+<script src="/static/js/tools.{{g.current_tool.alias}}.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/tools.{{g.current_tool.alias}}.css" type="text/css" />
+{% endblock %}
+{% block body %}
+{% if g.current_folder != None %}
+<span id="current_folder_span">{{g.current_folder.id}}</span>
+{% endif %}
+<div class="row-fluid">
+	<div class="col-md-3" id="folder_list_container">
+		<div class="row">
+			<div class="col-md-12" id="folders">
+				<ul>
+					{% for tool in g.admin_tools %}
+					{% if tool.status %}
+					<li {{'class="jstree-open"' if tool.home_route in request.path}}><a {{'class="jstree-clicked"' if tool.home_route in request.path}} href="{{tool.home_route}}">{{tool.name}}</a></li>
+					{% endif %}
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-9" id="form_container">
+		<div class="row" id="breadcrumb_row">
+			<div class="col-xs-1" id="show_hide_folders_button">
+				<a href="javascript:;" class="btn btn-xs btn-default"  onClick="toggleFolderView('form');">
+					<img src="/static/img/hide.png" alt="<" width="16" title="Hide Folders" />
+				</a>
+			</div>
+			<div class="col-md-11">
+				<!-- Breadcrumbs -->
+				<ol class="breadcrumb">
+					{% set admin_crumbs = request.path.split('/') %}
+					{% if admin_crumbs|count > 3 %}
+						<li><a href="{{g.current_tool.home_route}}">{{g.current_tool.name}}</a></li>
+						{% if g.current_tool.name == 'Tools' and 'groups' in request.path %}
+						<li>Groups</li>
+						{% endif %}
+						{% if admin_crumbs[-1] == 'new' %}
+							<li><strong>New</strong></li>
+						{% elif admin_crumbs[-1] == 'edit' %}
+							<li><strong>Update</strong></li>
+						{% elif admin_crumbs[-1] == 'detail' %}
+							<li><strong>Properties</strong></li>
+						{% endif %}
+					{% else %}
+					<li><strong>{{g.current_tool.name}}</strong></li>
+					{% endif %}
+					{% block breadcrumb_add %}{% endblock %}
+				</ol>
+			</div>
+		</div>
+		<div class="row" id="list_button_row">
+			<div class="col-md-12">
+				{% block tool_buttons %}{% endblock %}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12" id="form_row">
+				{% block content %}{% endblock %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

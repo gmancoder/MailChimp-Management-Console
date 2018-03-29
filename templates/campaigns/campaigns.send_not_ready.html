@@ -1,0 +1,24 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}{% endblock %}
+{% block content %}
+<div class="row" id="send_not_ready">
+	<div class="col-md-12">
+		<strong>Your Campaign IS NOT ready to be sent, see the checklist below for what needs to be completed</strong>
+		<ul>
+			{% for item in send_checklist_items %}
+			<li>
+				<strong>{{item['heading']}}</strong>
+				<ul>
+					<li>{{item['details']}}</li>
+					<li>
+						<span class="send-checklist-{{item['type']}}">
+							<strong>{{item['type']}}</strong>
+						</span>
+					</li>
+				</ul>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}

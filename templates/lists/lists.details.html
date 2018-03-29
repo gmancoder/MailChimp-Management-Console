@@ -1,0 +1,345 @@
+{% extends "layouts/layout.html" %}
+{% block head %}
+<script src="/static/js/tools.{{g.current_tool.alias}}.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/tools.{{g.current_tool.alias}}.css" type="text/javascript" />
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+	
+	var current_page = 1;
+	var current_list_id = {{current_list.id}}
+
+	$(document).ready(function() {
+		GetStatuses();
+		SubscriberPage(1);
+
+		//Import Modal
+		$('#import_modal_label').html('Import List Subscribers');
+		$('#import_folder_id').val(current_list_id);
+		$('#import_target_type').val('subscribers');
+
+		//Export Modal
+		$('#export_modal_label').html('Export List Subscribers');
+		$('#export_folder_id').val(current_list_id);
+		$('#export_target_type').val('subscribers');
+		$('#export_type option').remove();
+		$('#export_type').append(CreateDynamicOption("1", "All List Subscribers"));
+		$('#export_type').append(CreateDynamicOption("2", "Selected Subscribers"));
+
+		//Search Modal
+		$('#search_modal_label').html('Search List Subscribers');
+		$('#search_folder_id').val(current_list_id);
+		$('#search_target_type').val('subscribers');
+		$('#search_type_control').hide();
+	});
+</script>
+{% endblock %}
+{% block body %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row" id="breadcrumb_row">
+			<div class="col-md-12">
+				<!-- Breadcrumbs -->
+				<ol class="breadcrumb">
+					{% if g.current_folder != None %}
+					{{ g.current_folder.drawBreadCrumb("", -1) }}
+					{% endif %}
+					<li><strong>{{current_list.name}}</strong></li>
+				</ol>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<ul class="nav nav-tabs" role="tablist">
+				    <li role="presentation" class="active"><a href="#overview" aria-controls="overview" role="tab" data-toggle="tab">Overview</a></li>
+				    <li role="presentation"><a href="#subscribers" aria-controls="subscribers" role="tab" data-toggle="tab">Subscribers</a></li>
+				</ul>
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="overview">
+						<div class="row">
+							<div class="col-md-7" id="list_info_row">
+								<div class="row">
+									<div class="col-md-12">
+										<h4>List Information</h4>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6">
+										<strong>List ID: </strong><br />
+										{{current_list.id}}<br /><br />
+										<strong>MailChimp ID: </strong><br />
+										{{current_list.mailchimp_id}}
+									</div>
+									<div class="col-md-6">
+										<strong>Created</strong><br />
+										{{current_list.created}}<br /><br />
+										<strong>Updated</strong><br />
+										{{current_list.updated}}
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<h4>Status Overview</h4>
+										<div id="status_chart_loading" style="text-align:center;display:none;">
+											<img src="/static/img/ajax-loader.gif" alt="Loading" />
+											<div id="status_chart_loading_action"></div>
+										</div>
+										<div id="chart_container" style="display:none;">
+											<div id="chart_div" style="width:100%; min-height: 450px;"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" style="border:solid 1px #cccccc;"> 
+								<div class="row">
+									<div class="col-md-12">
+										<h4>List Merge Fields</h4>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<p>
+											<a href="javascript:;" onClick="AddMergeField();" class="btn btn-primary pull-right">Add Field</a>
+										</p>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<table width="100%" cellspacing="0" cellpadding="5" id="list_merge_fields_table" class="tool_list_table">
+											<thead>
+												<tr>
+													<th>Name</th>
+													<th>Tag</th>
+													<th>Type</th>
+													<th>Required</th>
+													<th>Actions</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for merge_field in current_list.merge_fields.all() %}
+												<tr>
+													<td>{{merge_field.name}}</td>
+													<td>{{merge_field.tag}}</td>
+													<td>{{merge_field.type}}</td>
+													<td>{{merge_field.required}}</td>
+													<td>
+														<a href="javascript:;" onClick="EditMergeField('{{merge_field.mailchimp_id}}', {{merge_field.id}});" class="btn btn-xs btn-default">
+															<img src="/static/img/edit.png" alt="Edit" title="Edit" />
+														</a>
+														<a href="javascript:;" onClick="DeleteMergeField('{{merge_field.mailchimp_id}}', {{merge_field.id}});" class="btn btn-xs btn-default">
+															<img src="/static/img/delete.png" alt="Delete" title="Delete" />
+														</a>
+													</td>
+												</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="subscribers">
+						<div class="row" id="list_button_row"> 
+							<div class="col-md-10">
+								<a href="/subscribers/{{current_list.id}}/add" class="btn btn-xs btn-primary">Add Subscriber</a>
+								<a href="/lists/{{current_list.id}}/properties" class="btn btn-xs btn-default">List Properties</a>
+								<a href="javascript:;" onClick="StartImport();" class="btn btn-xs btn-default">Import</a>
+								<a href="javascript:;" onClick="StartExport();" class="btn btn-xs btn-default">Export</a>
+								<a href="javascript:;" onClick="StartSearch();" class="btn btn-xs btn-default">Search</a>
+							</div>
+							<div class="col-md-2 pull-right" style="text-align:right;">
+								<a href="javascript:;" class="btn btn-xs btn-danger" onClick="DeleteSelectedSubscribers();" id="delete_objects_button" disabled="disabled">Delete Selected Subscribers</a>
+							</div>
+						</div>
+						<div id="list_subscribers_loading" style="text-align:center;display:none;">
+							<img src="/static/img/ajax-loader.gif" alt="Loading" />
+							<div id="status_chart_loading_action"></div>
+						</div>
+						<div id="list_subscriber_container" style="display:none;">
+							<div class="row">
+								<div class="col-md-12">
+									<table width="100%" cellspacing="0" cellpadding="5" id="list_subscribers_table" class="tool_list_table display nowrap">
+										<thead >
+											<tr id="list_subscriber_table_head">
+												<th align="center" style="width:25px;"><input type="checkbox" id="list_subscribers_check_all" name="list_subscribers_check_all" onClick="ToggleAll('list_subscribers_check');" /></th>
+												<th style="width:50px">ID</th>
+												<th style="width:400px;">Email Address</th>
+												<th style="width:150px">Email Type Preference</th>
+												<th style="width:200px">Date Added</th>
+												<th style="width:200px">Last Modified</th>
+											</tr>
+										</thead>
+										<tbody id="list_subscribers_table_body">
+											
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="row" id="table_foot_row">
+								<div class="col-md-6 table_foot">
+									Show&nbsp;
+									<select name="rows" id="show_rows" class="show_rows" onChange="ChangeSubscriberShowRows();">
+										<option value="10">10</option>
+										<option value="25">25</option>
+										<option value="50" selected>50</option>
+										<option value="100">100</option>
+										<option value="0">All</option>
+									</select>
+									&nbsp;Rows
+								</div>
+								<div class="col-md-6 pull-right table_foot" style="text-align:right;" id="subscriber_pagination"></div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Merge Field Form Modal -->
+<div class="modal fade" id="merge_field_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    	<div id="merge_field_modal_loading" style="text-align:center;display:none;">
+			<img src="/static/img/ajax-loader.gif" alt="Loading" />
+			<div id="merge_field_modal_loading_action"></div>
+		</div>
+    	<div id="merge_field_modal_content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel"><span id="new_update_label"></span> Merge Field</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form form-horizontal" id="merge_field_form" action="" method="POST" onSubmit="MergeFieldSubmit();return false;">
+					<input type="hidden" name="list_id" id="list_id" value="{{current_list.id}}" />
+					<input type="hidden" name="submit_type" id="submit_type" value="new" />
+					<input type="hidden" name="merge_field_id" id="merge_field_id" value="" />
+					<input type="hidden" name="merge_field_mailchimp_id" id="merge_field_mailchimp_id" value="" />
+					<input type="hidden" name="merge_field_old_tag" id="merge_field_old_tag" />
+					<div class="form-group">
+						<label for="merge_field_name" class="control-label col-lg-2">Name</label>
+						<div class="col-lg-10">
+							<input type="text" name="merge_field_name" onBlur="SetTag();" id="merge_field_name" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="merge_field_tag" class="control-label col-lg-2">Tag</label>
+						<div class="col-lg-10">
+							<input type="text" name="merge_field_tag" id="merge_field_tag" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group" id="merge_field_type_field">
+						<label for="merge_field_type" class="control-label col-lg-2">Type</label>
+						<div class="col-lg-10">
+							<select name="merge_field_type" id="merge_field_type" onChange="ShowAdditionalFields();" class="form-control">
+								<option value="text">Text</option>
+								<option value="number">Number</option>
+								<option value="radio">Radio Buttons</option>
+								<option value="dropdown">Drop Down</option>
+								<option value="date">Date</option>
+								<option value="birthday">Birthday</option>
+								<option value="address">Address</option>
+								<option value="zip">Zip Code (US Only)</option>
+								<option value="phone">Phone</option>
+								<option value="url">Website</option>
+								<option value="imageurl">Image</option>
+								<option value="email">Email Address</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="merge_field_required" class="control-label col-lg-2">Required</label>
+						<div class="col-lg-10">
+							<input type="checkbox" name="merge_field_required" id="merge_field_required" class="form-control sw-checkbox" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="merge_field_visible" class="control-label col-lg-2">Visible</label>
+						<div class="col-lg-10">
+							<input type="checkbox" name="merge_field_visible" id="merge_field_visible" class="form-control sw-checkbox" checked />
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="merge_field_default_value" class="control-label col-lg-2">Default Value</label>
+						<div class="col-lg-10">
+							<input type="text" name="merge_field_default_value" id="merge_field_default_value" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="merge_field_display_order" class="control-label col-lg-2">Display Order</label>
+						<div class="col-lg-10">
+							<input type="number" min="0" value="1" name="merge_field_display_order" id="merge_field_display_order" class="form-control" />
+						</div>
+					</div>
+					<span id="choice_options" class="additional_options" style="display:none;">
+						<input type="hidden" name="merge_field_choices" id="merge_field_choices" value=""/>
+						<h5></h5>
+					</span>
+					<span id="text_options" class="additional_options">
+						<div class="form-group">
+							<label for="merge_field_max_length" class="control-label col-lg-2">Max Length</label>
+							<div class="col-lg-10">
+								<input type="number" min="1" value="50" name="merge_field_max_length" id="merge_field_max_length" class="form-control" />
+							</div>
+						</div>
+					</span>
+					<span id="address_options" class="additional_options" style="display:none;">
+						<div class="form-group">
+							<label for="merge_field_default_country" class="control-label col-lg-2">Default Country</label>
+							<div class="col-lg-10">
+								<select name="merge_field_default_country" id="merge_field_default_country"  class="form-control">
+									<option value="">System Default</option>
+									{% for code, name in country_list.items() %}
+									<option value="{{code}}">{{name}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+					</span>
+					<span id="date_options" class="additional_options" style="display:none;">
+						<div class="form-group">
+							<label for="merge_field_date_format" class="control-label col-lg-2">Date Format</label>
+							<div class="col-lg-10">
+								<select name="merge_field_date_format" id="merge_field_date_format"  class="form-control">
+									<option value="MM/DD/YYYY">MM/DD/YYYY</option>
+									<option value="DD/MM/YYYY">DD/MM/YYYY</option>
+								</select>
+							</div>
+						</div>
+					</span>
+					<span id="birthday_options" class="additional_options" style="display:none;">
+						<div class="form-group">
+							<label for="merge_field_birthday_format" class="control-label col-lg-2">Date Format</label>
+							<div class="col-lg-10">
+								<select name="merge_field_birthday_format" id="merge_field_birthday_format"  class="form-control">
+									<option value="MM/DD">MM/DD</option>
+									<option value="DD/MM">DD/MM</option>
+								</select>
+							</div>
+						</div>
+					</span>
+					<span id="phone_options" class="additional_options" style="display:none;">
+						<div class="form-group">
+							<label for="merge_field_phone_format" class="control-label col-lg-2">Phone Format</label>
+							<div class="col-lg-10">
+								<select name="merge_field_phone_format" id="merge_field_phone_format"  class="form-control">
+									<option value="International">International</option>
+									<option value="(###) ###-####">(###) ###-####</option>
+								</select>
+							</div>
+						</div>
+					</span>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" onClick="MergeFieldSubmit();" class="btn btn-primary">Submit</nutton>
+				<button type="button" class="btn btn-default" onClick="ResetModal('merge_field_modal');" data-dismiss="modal">Cancel</button>
+			</div>
+   		</div>
+  	</div>
+  </div>
+</div>
+{% include "blocks/ies_modals.html" %}
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "layouts/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('imports');" class="import_action btn btn-xs btn-primary">Save</a>
+<a href="/imports" class="import_action btn btn-xs btn-default">Cancel</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#properties" aria-controls="properties" role="tab" data-toggle="tab" onClick="ChangeForm('form');">Properties</a></li>
+                    <li role="presentation"><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab" {{'class="disabled_tab" onClick="DisabledButton();"' if update_type == 'new' else 'onClick="ChangeForm(\'activity\');"'}}>Activity</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="properties">
+        				<form name="imports_form" id="imports_form" class="form form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-lg-2" for="name">Name:</label>
+                                <div class="col-lg-10">
+                                    <input type="text" name="name" id="name" class="form-control" value="{{import_definition.name}}" required/>
+                                </div>
+                            </div>
+                            <fieldset>
+                                <legend>File Details</legend>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-2" for="file_path">File: </label>
+                                    <div class="col-lg-8">
+                                        <input type="text" name="import_file" id="import_file" class="form-control" value="{{import_definition.file_path}}" readonly />
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <a href="javascript:;" onClick="ShowImportFileModal();" class="btn btn-success">Select</a>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="file_delimiter" class="control-label col-lg-2">Delimiter:</label>
+                                    <div class="col-lg-10">
+                                        <select name="file_delimiter" id="file_delimiter" class="form-control" required>
+                                            <option value="," {{"selected" if import_definition.file_delimiter == ','}}>,</option>
+                                            <option value="tab" {{"selected" if import_definition.file_delimiter == "tab"}}>tab</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Target</legend>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-2" for="target_type">Target Type:</label>
+                                    <div class="col-lg-10">
+                                        <select name="target_type" id="target_type" class="form-control" onChange="TargetTypeChanged();" required>
+                                            <option value="">- Select -</option>
+                                            <option value="lists" {{"selected" if import_definition.target_type == "lists"}}>Lists</option>
+                                            <option value="subscribers" {{"selected" if import_definition.target_type == "subscribers"}}>Subscribers</option>
+                                            <option value="template_categories" {{"selected" if import_definition.target_type == "template_categories"}}>Template Categories</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group target_type_group" id="target_folder_group" style="display:{{'none' if import_definition.target_type not in ('lists', 'template_categories') else 'block'}};">
+                                    <label class="control-label col-lg-2" for="target_folder_id">Target Folder:</label>
+                                    <div class="col-lg-10">
+                                        <input type="hidden" name="target_folder_id" value="{{import_definition.target_folder_id}}" />
+                                        <ul class="target_folders_ul" id="target_folders_lists">
+                                            <li class="jstree-open"><a href="javascript:;" class="jstree-clicked">Lists</a></li>
+                                            <ul id="target_folders_lists_ul">
+
+                                            </ul>
+                                        </ul>
+                                        <ul class="target_folders_ul" id="target_folders_template_categories">
+                                            <li class="jstree-open"><a href="javascript:;" class="jstree-clicked">Template Categories</a></li>
+                                            <ul id="target_folders_template_categories_ul">
+
+                                            </ul>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="form-group target_type_group" id="target_list_group" style="display:{{'none' if import_definition.target_type in ('lists', 'template_categories') else 'block'}};">
+                                    <label for="target_list_id" class="control-label col-lg-2">Target List</label>
+                                    <div class="col-lg-10">
+                                        <input type="hidden" name="target_list_id" value="{{import_definition.target_list_id}}" />
+                                        <ul>
+                                            <!-- List Folders and Lists here -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="import_type" class="control-label col-lg-2">Import Type:</label>
+                                    <div class="col-lg-10">
+                                        <select name="import_type" id="import_type" class="form-control" required>
+                                            <option value="1" {{"selected" if import_definition.import_type == 1}}>Add/Update</option>
+                                            <option value="2" {{"selected" if import_definition.import_type == 2}}>Add Only</option>
+                                            <option value="3" {{"selected" if import_definition.import_type == 3}}>Update Only</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Notification</legend>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-2" for="notify_addresses">Notification Address(es):</label>
+                                    <div class="col-lg-10">
+                                        <input type="text" name="notify_addresses" id="notify_addresses" class="form-control" value="{{import_definition.notify_addresses}}"/>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="activity">
+                        <table cellspacing="0" cellpadding="5" id="import_activity_table" class="tool_list_table">
+                            <thead>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

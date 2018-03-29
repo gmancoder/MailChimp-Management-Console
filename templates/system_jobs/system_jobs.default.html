@@ -1,0 +1,78 @@
+{% extends "layouts/admin/layout.folders_lists.html" %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<table cellspacing="0" cellpadding="5" id="system_jobs_table" class="tool_list_table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th style="width:250px;">Brand</th>
+					<th style="width:150px;">Type</th>
+					<th style="width:350px;">Name</th>
+					<th style="width:200px;">Created</th>
+					<th style="width:150px;">Status</th>
+					<th style="width:200px;">Started</th>
+					<th style="width:200px;">Ended</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for system_job in system_jobs %}
+				<tr>
+					<td><a href="/admin/system_jobs/{{system_job['Job'].id}}/detail">{{system_job['Job'].id}}</a></td>
+					<td style="width:250px;">{{system_job['Brand']}}</td>
+					<td style="width:150px;">{{system_job['Type']}}</td>
+					<td style="width:350px;">{{system_job['Name']}}</td>
+					<td style="width:200px;">{{system_job['Job'].created}}</td>
+					<td style="width:150px;">
+						{% if system_job['Job'].overall_status == 0 %}
+							Not Started
+						{% elif system_job['Job'].overall_status == 1 %}
+							In Progress
+						{% elif system_job['Job'].overall_status == 2 %}
+							Completed
+						{% elif system_job['Job'].overall_status == 3 %}
+							Failed
+						{% endif %}
+					</td>
+					<td style="width:200px;">{{system_job['Job'].start_date}}</td>
+					<td style="width:200px;">{{system_job['Job'].end_date}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" id="table_foot_row">
+	<div class="col-md-6 table_foot">
+		Show&nbsp;
+		<select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('system_jobs');">
+			<option value="10" {{"selected" if session['r'] == 10}}>10</option>
+			<option value="25" {{"selected" if session['r'] == 25}}>25</option>
+			<option value="50" {{"selected" if session['r'] == 50}}>50</option>
+			<option value="100" {{"selected" if session['r'] == 100}}>100</option>
+			<option value="0" {{"selected" if session['r'] == 0}}>All</option>
+		</select>
+		&nbsp;Rows
+	</div>
+	<div class="col-md-6 pull-right table_foot" style="text-align:right;">
+		{% if pages > 1 %}
+			{% if current_page > 1 %}
+			<a href="/admin/system_jobs/{{current_page - 1}}" class="page_link">< Prev</a>&nbsp;
+			{% endif %}
+			{% for idx in range(1, (pages + 1)) %}
+				{% if idx == current_page %}
+				<strong>{{idx}}</strong>&nbsp;
+				{% else %}
+				<a href="/admin/system_jobs/{{idx}}">{{idx}}</a>&nbsp;
+				{% endif %}
+			{% endfor %}
+			{% if current_page < pages %}
+			<a href="/admin/system_jobs/{{current_page + 1}}" class="page_link">Next ></a>&nbsp;
+			{% endif %}
+		{% else %}
+			<strong>1</strong>
+		{% endif %}
+	</div>
+</div>
+</div>
+{% endblock %}

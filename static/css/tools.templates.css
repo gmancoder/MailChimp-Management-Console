@@ -1,0 +1,25 @@
+.ace_editor {
+    direction: ltr;
+    font: 12px "Monaco","Menlo","Ubuntu Mono","Consolas","source-code-pro",monospace;
+    overflow: hidden;
+    position: relative;
+    text-align: left;
+}
+.ace_editor {
+    border: 1px solid lightgray;
+    height: 200px;
+    margin: auto;
+    position: relative !important;
+    width: 100%;
+}
+.disabled_tab {
+	color:#cccccc;
+	pointer-events: none;
+}
+#html_preview {
+	margin:10px;
+	border:solid 1px #777777;
+}
+#merge_tags_container {
+	overflow:auto;
+}

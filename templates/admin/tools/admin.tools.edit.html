@@ -1,0 +1,140 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('tools');" id="save_tool_form" class="btn btn-xs btn-primary">Save</a>
+<a href="javascript:;" onClick="AddSetting();" id="setting_tool_form" style="display:none;" class="btn btn-xs btn-primary">Add Setting</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="col-md-12">
+      <div class="row">
+          <div class="col-md-12">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#properties" aria-controls="properties" role="tab" data-toggle="tab" onClick="ChangeForm('form');">Properties</a></li>
+                <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab" onClick="ChangeForm('settings');">Tool Settings</a></li>
+            </ul>
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active" id="properties">
+                <form name="tools_form" id="tools_form" class="form form-horizontal" action="" method="POST">
+                  <input type="hidden" name="form" value="tool" />
+                  <div class="form-group">
+                      <label for="name" class="control-label col-lg-2">Name: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="name" name="name" onBlur="GenerateAlias(this.id, 'alias');" class="form-control" value="{{tool.name}}" placeholder="Enter Tool Name" required> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="name" class="control-label col-lg-2">Alias: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="alias" name="alias" class="form-control" readonly="readonly" value="{{tool.alias}}" placeholder="Enter Tool Alias"> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="group_id" class="control-label col-lg-2">Group: </label>
+                      <div class="col-lg-10">
+                          <select name="group_id", id="group_id" class="form-control" required>
+                              <option value="">- Select -</option>
+                              {% for grp in groups %}
+                              <option value="{{grp.id}}" {{"selected" if grp.id == tool.group_id}}>{{grp.name}}</option>
+                              {% endfor %}
+                          </select> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="description" class="control-label col-lg-2">Description: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="description" name="description" class="form-control" placeholder="Enter Tool Description" required value="{{tool.description}}"> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="rank" class="control-label col-lg-2">Order: </label>
+                      <div class="col-lg-10">
+                          <input type="text" step="any" id="rank" name="rank" class="form-control" placeholder="Enter Tool Rank" required value="{{tool.rank if tool.rank != "" else 0}}"> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="is_admin" class="control-label col-lg-2">Is Admin: </label>
+                      <div class="col-lg-10">
+                          <input type="checkbox" id="is_admin" name="is_admin" class="sw-checkbox" value="1" {{"checked" if tool.is_admin == 1}} /> 
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label for="home_route" class="control-label col-lg-2">Home Route: </label>
+                      <div class="col-lg-10">
+                          <input type="text" id="home_route" name="home_route" class="form-control" placeholder="Enter Tool's Home Route" required value="{{tool.home_route}}"> 
+                      </div>
+                  </div>
+                </form>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="settings">
+                <table width="100%" cellspacing="0" cellpadding="5" id="settings_table">
+                  <thead>
+                      <tr>
+                          <th>Key</th>
+                          <th>Value</th>
+                          <th>Last Modified</th>
+                          <th class="action_column">Action</th>
+                      </tr>
+                  </thead>
+                  <tbody id="settings_table_body">
+                      {% for setting in tool.settings %}
+                      <tr id="{{setting.id}}">
+                          <td>{{setting.key}}</td>
+                          <td>{{setting.value}}</td>
+                          <td>{{setting.updated}}</td>
+                          <td align="center"><a href="javascript:;" onClick='DeleteSetting({{setting.id}});' class="btn btn-xs btn-danger">Delete</a></td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+<div class="modal fade" id="tool_setting_modal" tabindex="-1" role="dialog" aria-labelledby="tool_setting_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div id="tool_setting_modal_content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="tool_setting_modal_label">Add Setting</h4>
+      </div>
+      <div class="modal-body">
+        <div id="tool_setting_modal_loading" style="text-align:center;display:none;">
+          <img src="/static/img/ajax-loader.gif" alt="Loading" />
+          <div id="tool_setting_modal_loading_action"></div>
+        </div>
+        <form class="form form_horizontal" id="tool_setting_modal_form">
+          <input type="hidden" name="tool_id" id="tool_id" value="{{tool.id}}" />
+          <input type="hidden" name="form" value="setting" />
+
+          <div class="form-group">
+              <label for="key" class="control-label col-lg-2">Key: </label>
+              <div class="col-lg-10">
+                <input type="text" id="key" name="key" class="form-control" placeholder="Enter Setting Key" required>
+              </div>
+          </div>
+          <div class="form-group">
+              <label for="value" class="control-label col-lg-2">Value: </label>
+              <div class="col-lg-10">
+                <input type="text" id="value" name="value" class="form-control" placeholder="Enter Setting Value" required>
+              </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="tool_setting_modal_continue_button" onClick="SaveSetting();" class="btn btn-primary">Save Setting</nutton>
+        <button type="button" class="btn btn-default" onClick="ResetModal('tool_setting_modal');" data-dismiss="modal">Cancel</button>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

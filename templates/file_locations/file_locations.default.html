@@ -1,0 +1,69 @@
+{% extends "layouts/admin/layout.folders_lists.html" %}
+{% block tool_buttons %}
+<a href="/admin/file_locations/new" class="btn btn-xs btn-primary">New File Location</a>
+{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<table cellspacing="0" cellpadding="5" id="file_locations_table" class="tool_list_table">
+			<thead>
+				<tr>
+					<th align="center" style="width:25px;"><input type="checkbox" id="file_locations_check_all" name="file_locations_check_all" onClick="ToggleAll('file_locations_check');" /></th>
+					<th>ID</th>
+					<th style="width:250px;">Brand</th>
+					<th style="width:300px;">Name</th>
+					<th style="width:100px;">Type</th>
+					<th style="width:150px;">Created</th>
+					<th style="width:150px;">Last Updated</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for file_location in file_locations %}
+				<tr>
+					<td align="center" style="width:25px;"><input type="checkbox" class="file_locations_check" name="check_{{file_location['FL'].id}}" id="check_{{file_location['FL'].id}}" value="{{file_location['FL'].id}}" /></td>
+					<td>{{file_location['FL'].id}}</td>
+					<td style="width:250px;">{{file_location['Brand'].client}}</td>
+					<td style="width:300px;"><a href="/admin/file_locations/{{file_location['FL'].id}}/detail">{{file_location['FL'].name}}</a></td>
+					<td style="width:100px;">{{file_location['FL'].type|capitalize}}</td>
+					<td style="width:150px;">{{file_location['FL'].created}}</td>
+					<td style="width:150px;">{{file_location['FL'].updated}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" id="table_foot_row">
+	<div class="col-md-6 table_foot">
+		Show&nbsp;
+		<select name="rows" id="show_rows" class="show_rows" onChange="ChangeShowRows('file_locations');">
+			<option value="10" {{"selected" if session['r'] == 10}}>10</option>
+			<option value="25" {{"selected" if session['r'] == 25}}>25</option>
+			<option value="50" {{"selected" if session['r'] == 50}}>50</option>
+			<option value="100" {{"selected" if session['r'] == 100}}>100</option>
+			<option value="0" {{"selected" if session['r'] == 0}}>All</option>
+		</select>
+		&nbsp;Rows
+	</div>
+	<div class="col-md-6 pull-right table_foot" style="text-align:right;">
+		{% if pages > 1 %}
+			{% if current_page > 1 %}
+			<a href="/file_locations/{{current_page - 1}}" class="page_link">< Prev</a>&nbsp;
+			{% endif %}
+			{% for idx in range(1, (pages + 1)) %}
+				{% if idx == current_page %}
+				<strong>{{idx}}</strong>&nbsp;
+				{% else %}
+				<a href="/file_locations/{{idx}}">{{idx}}</a>&nbsp;
+				{% endif %}
+			{% endfor %}
+			{% if current_page < pages %}
+			<a href="/file_locations/{{current_page + 1}}" class="page_link">Next ></a>&nbsp;
+			{% endif %}
+		{% else %}
+			<strong>1</strong>
+		{% endif %}
+	</div>
+</div>
+</div>
+{% endblock %}

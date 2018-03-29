@@ -1,0 +1,40 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block tool_buttons %}
+<a href="javascript:;" onClick="SubmitForm('tool_groups');" class="btn btn-xs btn-primary">Save</a>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <form name="tool_groups_form" id="tool_groups_form" class="form form-horizontal" action="" method="POST">
+                    <div class="form-group">
+                        <label for="name" class="control-label col-lg-2">Name: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="name" name="name" onBlur="GenerateAlias(this.id, 'alias');" class="form-control" value="{{request.form.name}}" placeholder="Enter Tool Group Name" required> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="name" class="control-label col-lg-2">Alias: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="alias" name="alias" class="form-control" value="{{request.form.alias}}" placeholder="Enter Tool Group Alias"> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="rank" class="control-label col-lg-2">Order: </label>
+                        <div class="col-lg-10">
+                            <input type="number" id="rank" name="rank" class="form-control" placeholder="Enter Tool Group Rank" required value="{{request.form.rank if request.form.rank != "" else 0}}"> 
+        				</div>
+        			</div>
+        			<div class="form-group">
+                        <label for="icon" class="control-label col-lg-2">Icon: </label>
+                        <div class="col-lg-10">
+                            <input type="text" id="icon" name="icon" class="form-control" placeholder="Enter Tool Group Icon" required value="{{request.form.icon}}"> 
+        				</div>
+        			</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

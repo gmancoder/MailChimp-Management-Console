@@ -1,0 +1,276 @@
+{% extends "layouts/layout.html" %}
+{% block head %}
+<script src="/static/js/tools.{{g.current_tool.alias}}.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/tools.{{g.current_tool.alias}}.css" type="text/css" />
+<script src="/static/js/jquery.colorbox-min.js" type="text/javascript"></script>
+<link rel="Stylesheet" href="/static/css/colorbox.css" type="text/css" />
+{% endblock %}
+{% block body %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row" id="breadcrumb_row">
+			<div class="col-md-12">
+				<!-- Breadcrumbs -->
+				<ol class="breadcrumb">
+					{% if g.current_folder != None %}
+					{{ g.current_folder.drawBreadCrumb("", -1) }}
+					{% endif %}
+					<li><strong>{{tracked.campaign_name}}</strong></li>
+				</ol>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12" id="tracking_detail">
+				<div class="row">
+					<div class="col-md-6">
+						<table width="100%" cellpadding="5" id="details_table" class="tracking_table">
+							<tr>
+								<th class="left-heading">List:</th>
+								<td>{{tracked.list_name}}</td>
+							</tr>
+							{% if tracked.segment_name != None and tracked.segment_name != "" %}
+							<tr>
+								<th class="left-heading">Segment:</th>
+								<td>{{tracked.segment_name}}</td>
+							</tr>
+							{% endif %}
+							<tr>
+								<th class="left-heading">Sent:</th>
+								<td>
+									{% if tracked.number_sent > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/sent">
+									{% endif %}
+									{{tracked.number_sent}}
+									{% if tracked.number_sent > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/sent">View</a>)
+									{% endif %}
+								</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Delivered:</th>
+								<td>{{tracked.number_delivered}}</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Delivery Rate:</th>
+								<td>{{(tracked.delivery_rate * 100)|round(3)}}%</td>
+							</tr>
+						</table>
+					</div>
+					<div class="col-md-6">
+						<table width="100%" cellpadding="5" class="tracking_table" id="variate_details_table">
+							<tr>
+								<th class="left-heading">Test Type:</th>
+								<td>{{tracked.variate_campaign_test_type.replace('_', ' ')|title}}</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Test Size:</th>
+								<td>{{tracked.variate_campaign_test_size}}%</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Winner Wait Time:</th>
+								<td>{{tracked.variate_campaign_wait_time}} minutes</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Winner Criteria</th>
+								<td>{{tracked.variate_campaign_winner_criteria|title}}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div class="row">
+					{% for email in emails %}
+					<div class="col-md-{{email['col_size']}}">
+						<div class="row tracking_table">
+							<div class="col-md-4">
+								<div style="text-align:center;"><a class="email_screenshot" title="{{email['email_name']}}" href="/static/img/emails/{{g.current_brand.id}}/{{email['email_id']}}.jpg"><img src="/static/img/emails/{{g.current_brand.id}}/{{email['email_id']}}.jpg" width="100%"  /></a><br /><span class="small-font">Click for larger view</span></div>
+								{% if email['is_winner'] %}
+								<div style="text-align:center;">
+									<img src="/static/img/ab_test_winner.png" align="absmiddle" width="24px" alt="star" />&nbsp;<strong>WINNER</strong>
+								</div>
+								{% endif %}
+							</div>
+							<div class="col-md-8">
+								<table width="100%" cellpadding="5" id="variate_detail_{{email['email_id']}}_table">
+								
+								<tr>
+									<th class="left-heading">Email Name:</th>
+									<td>{{email['email_name']}}</td>
+								</tr>
+								<tr>
+									<th class="left-heading">Send Time:</th>
+									<td>{{email['send_time']}}</td>
+								</tr>
+								<tr>
+									<th class="left-heading">Subject Line:</th>
+									<td>{{email['subject_line']}}</td>
+								</tr>
+								<tr>
+									<th class="left-heading">From Name:</th>
+									<td>{{email['from_name']}}</td>
+								</tr>
+								<tr>
+									<th class="left-heading">Reply To:</th>
+									<td>{{email['reply_to']}}</td>
+								</tr>
+							</table>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<table width="100%" cellpadding="5" class="tracking_table" id="bounce_table">
+							<tr>
+								<th></th>
+								<th>Total</th>
+								<th>Rate</th>
+							</tr>
+							<tr>
+								<th class="left-heading">Hard Bounces</th>
+								<td>
+									{% if tracked.number_hard_bounces > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/bounce?type=hard">
+									{% endif %}
+									{{tracked.number_hard_bounces}}
+									{% if tracked.number_hard_bounces > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/bounce?type=hard">View</a>)
+									{% endif %}
+								</td>
+								<td>{{(tracked.percent_hard_bounces * 100)|round(3)}}%</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Soft Bounces</th>
+								<td>
+									{% if tracked.number_soft_bounces > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/bounce?type=soft">
+									{% endif %}
+									{{tracked.number_soft_bounces}}
+									{% if tracked.number_soft_bounces > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/bounce?type=soft">View</a>)
+									{% endif %}
+								</td>
+								<td>{{(tracked.percent_soft_bounces * 100)|round(3)}}%</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Total Bounces</th>
+								<td>
+									{% if tracked.number_soft_bounces + tracked.number_hard_bounces > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/bounce">
+									{% endif %}
+									{{tracked.number_soft_bounces + tracked.number_hard_bounces}}
+									{% if tracked.number_soft_bounces > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/bounce">View</a>)
+									{% endif %}
+								</td>
+								<td>{{(((tracked.percent_hard_bounces + tracked.percent_soft_bounces) / tracked.number_delivered) * 100)|round(3)}}%</td>
+							</tr>
+						</table>
+					</div>
+					<div class="col-md-4">
+						<table width="100%" cellpadding="5" class="tracking_table" id="opens_clicks_table">
+							<tr>
+								<th></th>
+								<th>Total</th>
+								<th>Unique</th>
+								<th>Rate</th>
+							</tr>
+							<tr>
+								<th class="left-heading">Opens</th>
+								<td>
+									{% if tracked.number_opens > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/open">
+									{% endif %}
+									{{tracked.number_opens}}
+									{% if tracked.number_opens > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/open">View</a>)
+									{% endif %}
+								</td>
+								<td>{{tracked.number_unique_opens}}</td>
+								<td>{{(tracked.percent_opens * 100)|round(3)}}%</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Clicks</th>
+								<td>
+									{% if tracked.number_clicks > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/click">
+									{% endif %}
+									{{tracked.number_clicks}}
+									{% if tracked.number_clicks > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/click">View</a>)
+									{% endif %}
+								</td>
+								<td>{{tracked.number_unique_clicks}}</td>
+								<td>{{(tracked.percent_clicks * 100)|round(3)}}%</td>
+							</tr>
+						</table>
+						<table width="100%" cellpadding="5" class="tracking_table" id="unsub_table">
+							<tr>
+								<th></th>
+								<th>Total</th>
+							</tr>
+							<tr>
+								<th class="left-heading">Unsubscribes</th>
+								<td>
+									{% if tracked.number_unsubs > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/unsub">
+									{% endif %}
+									{{tracked.number_unsubs}}
+									{% if tracked.number_unsubs > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/unsub">View</a>)
+									{% endif %}
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="col-md-4">
+						<table width="100%" cellpadding="5" class="tracking_table" id="ecom_table">
+							<tr>
+								<th></th>
+								<th>Total</th>
+							</tr>
+							<tr>
+								<th class="left-heading">Orders</th>
+								<td>
+									{% if tracked.total_orders > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/orders">
+									{% endif %}
+									{{tracked.total_orders}}
+									{% if tracked.total_orders > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/orders">View</a>)
+									{% endif %}
+								</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Spent</th>
+								<td>
+									{% if tracked.total_spent > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/spent">
+									{% endif %}
+									${{tracked.total_spent}}
+									{% if tracked.total_spent > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/spent">View</a>)
+									{% endif %}
+								</td>
+							</tr>
+							<tr>
+								<th class="left-heading">Revenue</th>
+								<td>
+									{% if tracked.total_revenue > 0 %}
+									<a href="/tracking/ab_tests/{{tracked.id}}/revenue">
+									{% endif %}
+									${{tracked.total_revenue}}
+									{% if tracked.total_revenue > 0 %}
+									</a>&nbsp(<a href="/tracking/ab_tests/{{tracked.id}}/revenue">View</a>)
+									{% endif %}
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

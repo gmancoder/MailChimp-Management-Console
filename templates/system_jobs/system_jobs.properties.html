@@ -1,0 +1,43 @@
+{% extends "layouts/admin/layout.folders_forms.html" %}
+{% block content %}
+<div class="row-fluid">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-6">
+				<strong>Job ID: </strong><br />
+                {{system_job.id}}<br /><br />
+                <strong>Brand: </strong><br />
+                {{brand.client}}<br /><br />
+                <strong>Type:</strong><br />
+                {{type}}<br /><br />
+                <strong>Name:</strong>
+                {{name}}<br /><br />
+			</div>
+            <div class="col-md-6">
+                <strong>Submitted:</strong><br />
+                {{system_job.created}}<br /><br />
+                <strong>Started:</strong><br />
+                {{system_job.start_date}}<br /><br />
+                <strong>Ended:</strong><br />
+                {{system_job.end_date}}<br /><br />
+            </div>
+		</div>
+        <div class="row">
+            <div class="col-md-12">
+                <strong>Status:</strong><br />
+                {% if system_job.overall_status == 0 %}
+                    Not Started
+                {% elif system_job.overall_status == 1 %}
+                    In Progress
+                {% elif system_job.overall_status == 2 %}
+                    Completed
+                {% elif system_job.overall_status == 3 %}
+                    Failed
+                {% endif %}<br /><br />
+                <strong>Status Details: </strong><br />
+                {{system_job.status_message}}<br /><br />
+            </div>
+        </div>
+	</div>
+</div>
+{% endblock %}
