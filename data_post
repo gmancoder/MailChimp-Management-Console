@@ -1,4 +1,0 @@
-curl --request POST \
---url 'https://us9.api.mailchimp.com/3.0/campaigns/402b95ed5f/actions/unschedule' \
---user 'nysoma:2023e565f719a82ed012984c4c38848f-us9' \
---include
